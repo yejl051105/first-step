@@ -1,42 +1,105 @@
-<template>
-  <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
-    <!-- 1. prop 绑定规则字段 -->
-    <el-form-item label="用户名" prop="username">
-      <el-input v-model="form.username" />
-    </el-form-item>
-    <el-form-item>
-      <el-button type="primary" @click="submitForm">提交</el-button>
-    </el-form-item>
-  </el-form>
-</template>
+  <script setup>
+  import router from '@/router';
+  import { computed } from 'vue';
+  import { useRoute } from 'vue-router';
 
-<script lang="ts" setup>
-import { reactive, ref } from 'vue'
-import type { FormInstance, FormRules } from 'element-plus'
+  const route = useRoute()
 
-// 表单对象
-const form = reactive({ username: '' })
-const formRef = ref<FormInstance>()
+  const activeIndex = computed(()=>route.path)
 
-// 2. 定义校验规则
-const rules = reactive<FormRules>({
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' },
-  ],
-})
+  </script>
 
-// 3. 提交表单时校验
-const submitForm = async () => {
-  if (!formRef.value) return
-  await formRef.value.validate((valid, fields) => {
-    if (valid) {
-      console.log(valid,fields)
-      console.log('校验通过!')
-    } else {
-      console.log(valid)
-      console.log('校验失败!', fields)
-    }
-  })
-}
-</script>
+  <template>
+    <div class="contaier">
+      <el-container class="body">
+        <el-header class="header">
+          <h2 class="left">Vue3 Demo Admin</h2>
+          <div class="right">
+            <div class="greeting">Welcome, Admin</div>
+            <div class="logout">Logout</div>
+          </div>
+        </el-header>
+        <el-container class="footer">
+          <el-aside class="aside">
+            <el-menu class="menu" :default-active="activeIndex" router>
+              <el-menu-item  index="/home/dashboard"><el-icon><i-ep-Odometer /></el-icon>
+                Dashboard</el-menu-item>
+              <el-menu-item index="/home/userlist"><el-icon><i-ep-UserFilled /></el-icon>
+                User
+                Management</el-menu-item>
+              <el-menu-item index="/home/settings"><el-icon><i-ep-Setting /></el-icon>
+                Settings</el-menu-item>
+            </el-menu>
+          </el-aside>
+          <el-main class="main">
+            <RouterView></RouterView>
+          </el-main>
+        </el-container>
+      </el-container>
+    </div>
+  </template>
+
+
+
+  <style scoped>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    height: 100vh;
+    width: 100%;
+  }
+
+  .body {
+    width: 100vw;
+    height: 100vh;
+    background-color: green;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 40px;
+    background-color: pink;
+  }
+
+  .header .right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .header .right .greeting {
+    padding: 10px;
+    font-size: 18px;
+    border-right: .5px solid black;
+
+  }
+
+  .header .right .logout {
+    padding: 10px;
+    font-size: 18px;
+  }
+
+  .footer {
+    width: 100%;
+  }
+
+  .aside {
+    background-color: blue;
+    width: 15%;
+  }
+
+  .menu {
+    height: 100%;
+  }
+
+  .main {
+    width: 85%;
+    background-color: yellow;
+  }
+  </style>

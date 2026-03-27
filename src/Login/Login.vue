@@ -18,7 +18,7 @@ const FormData = ref({
 
 // 登录事件
 const login = async (FormData) => {
-  if(!FormRef.value) return 
+  if (!FormRef.value) return
   try {
     await FormRef.value.validate()
   } catch (error) {
@@ -56,50 +56,59 @@ const rules = reactive({
 
 <template>
   <!-- 最外层登录大盒子 -->
-  <div class="container">
-    <!-- 登录盒子上半表单部分 -->
-    <div class="container-top">
-      <!-- 表单标题 -->
-      <h2 class="title">Vue3 Demo Admin</h2>
-      <!-- 表单部分 -->
-      <el-form class="container-form" :model="FormData" :rules="rules" ref="FormRef">
-        <el-form-item prop="username">
-          <el-input v-model="FormData.username" placeholder="Username"></el-input>
-        </el-form-item>
-        <el-form-item prop="password">
-          <el-input type="password" show-password v-model="FormData.password" placeholder="Password"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-checkbox>Remember Me</el-checkbox>
-        </el-form-item>
-      </el-form>
-      <div class="btn">
-        <el-button @click="login(FormData)" class="btn">Login</el-button>
-        <div>Forgot Password?</div>
+  <div class="parent">
+    <div class="container">
+      <!-- 登录盒子上半表单部分 -->
+      <div class="container-top">
+        <!-- 表单标题 -->
+        <h2 class="title">Vue3 Demo Admin</h2>
+        <!-- 表单部分 -->
+        <el-form class="container-form" :model="FormData" :rules="rules" ref="FormRef">
+          <el-form-item class="el-form-item" prop="username">
+            <el-input v-model="FormData.username" placeholder="Username"></el-input>
+          </el-form-item>
+          <el-form-item class="el-form-item" prop="password">
+            <el-input type="password" show-password v-model="FormData.password" placeholder="Password"></el-input>
+          </el-form-item>
+          <el-form-item class="el-form-item">
+            <el-checkbox>Remember Me</el-checkbox>
+          </el-form-item>
+        </el-form>
+        <div class="btn">
+          <el-button @click="login(FormData)" class="btn">Login</el-button>
+          <div>Forgot Password?</div>
+        </div>
       </div>
-    </div>
-    <!-- 登录盒子下半提醒部分 -->
-    <div :class="{ containerBottom: errorMessage }">
-      <!-- 提醒部分 密码或者姓名错了才显示-->
-      <div v-if="errorMessage">Error:Invaild username or password</div>
-      <!-- 提醒部分 表单检验失败就显示 -->
-      <div v-if="requiredMessage">Error:Illegal username or password</div>
+      <!-- 登录盒子下半提醒部分 -->
+      <div :class="{ containerBottom: errorMessage, containerBottom: requiredMessage }">
+        <!-- 提醒部分 密码或者姓名错了才显示-->
+        <div v-if="errorMessage">Error:Invaild username or password</div>
+        <!-- 提醒部分 表单检验失败就显示 -->
+        <div v-if="requiredMessage">Error:Illegal username or password</div>
+      </div>
     </div>
   </div>
 </template>
 
-<style>
+<style scoped>
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+.parent{
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .container {
   width: 310px;
-  margin: auto;
   border: 1px solid grey;
   border-radius: 5px;
+
 }
 
 .title {
@@ -111,6 +120,10 @@ const rules = reactive({
 .container-form {
   width: 100%;
   padding: 5px 20px;
+}
+
+.el-form-item {
+  padding-top: 15px;
 }
 
 .btn {
