@@ -1,14 +1,14 @@
 <script setup>
 import router from "@/router"
+import { ElMessage } from "element-plus"
+import 'element-plus/es/components/message/style/css'
 import { ref, reactive } from "vue"
-
-// 定义密码或用户名错误提示的动态样式
-const errorMessage = ref(false)
-// 定义表单校验错误的动态样式
-const requiredMessage = ref(false)
 
 // 获取表单实例
 const FormRef = ref()
+
+// 假的token 因为我们还没写后端
+const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFkbWluIiwiaWF0IjoxNTE2MjM5MDIyfQ.qS8B_p7rX9jXv-Bq3u_Lp9qG_uP9M_fW8B_p7rX9jXv'
 
 // 表单绑定
 const FormData = ref({
@@ -18,26 +18,37 @@ const FormData = ref({
 
 // 登录事件
 const login = async (FormData) => {
+  // 获取不到表单元素 防止报错
   if (!FormRef.value) return
   try {
+    // 表单校验
     await FormRef.value.validate()
   } catch (error) {
-    requiredMessage.value = true
     return
   }
 
   // 姓名或密码错误 登录失败
   if (FormData.username !== 'zhangsan' || FormData.password !== '123123') {
-    console.log('登录失败')
-    errorMessage.value = true
+    ElMessage({
+      message: '姓名或密码错误,请重新输入',
+      type: 'error',
+      placement: "top"
+    })
+    FormData.username = FormData.password = ''
     return
   }
   // 登录成功
   FormData.username = FormData.password = ''
-  errorMessage.value = false
-  router.push('/home')
-  console.log('登录成功')
-
+  ElMessage({
+    message: "登录成功,即将跳转首页",
+    type: "success",
+    placement: "top"
+  })
+  // 把token登录凭证存入本地
+  localStorage.setItem("Token",token)
+  setTimeout(() => {
+    router.push('/home')
+  }, 1000)
 }
 
 // 表单校验规则
@@ -79,13 +90,6 @@ const rules = reactive({
           <div>Forgot Password?</div>
         </div>
       </div>
-      <!-- 登录盒子下半提醒部分 -->
-      <div :class="{ containerBottom: errorMessage, containerBottom: requiredMessage }">
-        <!-- 提醒部分 密码或者姓名错了才显示-->
-        <div v-if="errorMessage">Error:Invaild username or password</div>
-        <!-- 提醒部分 表单检验失败就显示 -->
-        <div v-if="requiredMessage">Error:Illegal username or password</div>
-      </div>
     </div>
   </div>
 </template>
@@ -97,7 +101,7 @@ const rules = reactive({
   box-sizing: border-box;
 }
 
-.parent{
+.parent {
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -135,11 +139,5 @@ const rules = reactive({
   margin: 20px 0;
   font-size: 12px;
   text-align: right;
-}
-
-.containerBottom {
-  border-top: 1px solid grey;
-  padding: 20px;
-  text-align: center;
 }
 </style>
