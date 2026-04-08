@@ -1,4 +1,6 @@
 <script setup>
+import { getUserList } from "@/api/handleUserList"
+import { userList } from "@/mock/table_list"
 import router from "@/router"
 import { ElMessage } from "element-plus"
 import 'element-plus/es/components/message/style/css'
@@ -6,6 +8,9 @@ import { ref, reactive } from "vue"
 
 // 获取表单实例
 const FormRef = ref()
+
+// 获取本地存储的用户数据 用来判断密码和账号是否正确
+const userlist = getUserList(userList)
 
 // 假的token 因为我们还没写后端
 const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFkbWluIiwiaWF0IjoxNTE2MjM5MDIyfQ.qS8B_p7rX9jXv-Bq3u_Lp9qG_uP9M_fW8B_p7rX9jXv'
@@ -15,6 +20,20 @@ const FormData = ref({
   username: '',
   password: ''
 })
+
+// 防抖函数
+function debounce(fn, delay = 300) {
+  let timer = null
+  return function (...args) {
+    if (timer != null) {
+      clearTimeout(timer)
+      timer = null
+    }
+    timer = setTimeout(() => {
+      fn.call(this, ...args)
+    }, delay);
+  }
+}
 
 // 登录事件
 const login = async (FormData) => {
@@ -28,15 +47,16 @@ const login = async (FormData) => {
   }
 
   // 姓名或密码错误 登录失败
-  if (FormData.username !== 'zhangsan' || FormData.password !== '123123') {
-    ElMessage({
-      message: '姓名或密码错误,请重新输入',
-      type: 'error',
-      placement: "top"
-    })
-    FormData.username = FormData.password = ''
-    return
+  for (let i = 0; i <= userlist.length; i++) {
+    // 如果有一个匹配的账号和密码 就直接退出循环 进入登录成功的后续程序
+    if (i === userlist.length) {
+      ElMessage.error('姓名或密码错误,请重新输入')
+      FormData.username = FormData.password = ''
+      return
+    }
+    if (FormData.username === userlist[i].username && FormData.password === userlist[i].pwd) break
   }
+
   // 登录成功
   FormData.username = FormData.password = ''
   ElMessage({
@@ -45,7 +65,10 @@ const login = async (FormData) => {
     placement: "top"
   })
   // 把token登录凭证存入本地
-  localStorage.setItem("Token",token)
+  if (!localStorage.getItem('Token')) {
+    localStorage.setItem("Token", token)
+    console.log(222)
+  }
   setTimeout(() => {
     router.push('/home')
   }, 1000)
@@ -55,7 +78,7 @@ const login = async (FormData) => {
 const rules = reactive({
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 8, message: '名字长度在3-8个字符', trigger: 'blur' },
+    { min: 3, max: 20, message: '名字长度在3-20个字符', trigger: 'blur' },
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },

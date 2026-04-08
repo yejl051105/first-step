@@ -3,7 +3,7 @@ import Home from '@/Home/Home.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import UserList from '@/UserList/UserList.vue'
 import Dashboard from '@/Dashboard/Dashboard.vue'
-import Setting from '@/Setting/Setting.vue'
+import Setting from '@/Setting/Settings.vue'
 import { ElMessage } from 'element-plus'
 
 const router = createRouter({

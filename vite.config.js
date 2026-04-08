@@ -9,23 +9,24 @@ import IconsResolver from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
     vueDevTools(),
     AutoImport({
-      imports:['vue'],
-      resolvers: [ElementPlusResolver(),
-      IconsResolver({ prefix: 'Icon' }),
-      ],
+      imports: ['vue'],
+      resolvers: [ElementPlusResolver()],
     }),
     Components({
-      resolvers: [ElementPlusResolver(),
-      IconsResolver({ enabledCollections: ['ep'] }),
+      resolvers: [
+        ElementPlusResolver(),
+        IconsResolver({ enabledCollections: ['ep', 'mdi'] }),
       ],
     }),
-    Icons({ autoInstall: true }),
+    Icons({
+      autoInstall: true,
+      compiler: 'vue3',
+    }),
   ],
   resolve: {
     alias: {
