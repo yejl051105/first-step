@@ -1,4 +1,5 @@
   <script setup>
+  import { logout, loginUserState } from '@/api/handleUserList';
   import router from '@/router';
   import { ElMessage } from 'element-plus';
   import { computed } from 'vue';
@@ -6,10 +7,12 @@
 
   const route = useRoute()
   const activeIndex = computed(() => route.path)
+  const loginUserName = computed(() => loginUserState.value?.username ?? '')
 
   // 处理退出登录事件
   const handleConfirm = () => {
-    localStorage.removeItem("Token")
+    // 退出登录 清除登录凭证 Token 和 清除登录用户 loginUser
+    logout()
     ElMessage.warning('即将退出至登录页面')
     setTimeout(() => {
       router.push({ name: 'login' })
@@ -24,7 +27,7 @@
         <el-header class="header">
           <h2 class="left">Vue3 Demo Admin</h2>
           <div class="right">
-            <div class="greeting">Welcome, Admin</div>
+            <div class="greeting">Welcome, <strong>{{ loginUserName }}</strong></div>
             <div class="logout">
               <el-popconfirm title="Are you sure to logout?" @confirm="handleConfirm">
                 <template #reference>
@@ -71,7 +74,8 @@
 .body {
   width: 100vw;
   height: 100vh;
-  background-color: green;
+  background-color: var(--app-bg);
+  color: var(--app-text);
 }
 
 .header {
@@ -79,7 +83,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 40px;
-  background-color: pink;
+  background-color: #0f172a;
+  color: #f8fafc;
+  border-bottom: 1px solid #1f2937;
 }
 
 .header .right {
@@ -88,10 +94,15 @@
   justify-content: center;
 }
 
+.header .left {
+  color: #f8fafc;
+}
+
 .header .right .greeting {
   padding: 10px;
   font-size: 18px;
-  border-right: .5px solid black;
+  border-right: .5px solid #334155;
+  color: #cbd5e1;
 
 }
 
@@ -102,12 +113,14 @@
 
 .logout-btn {
   padding: 10px;
-  background-color: pink;
-  border: .3px black solid;
+  background-color: #111827;
+  border: .3px solid #334155;
+  color: #f8fafc;
 }
 
 .logout-btn:hover {
   cursor: pointer;
+  background-color: #1f2937;
 }
 
 .footer {
@@ -115,16 +128,40 @@
 }
 
 .aside {
-  background-color: blue;
+  background-color: #111827;
   width: 18%;
 }
 
 .menu {
   height: 100%;
+  background-color: transparent;
 }
 
 .main {
   width: 85%;
-  background-color: yellow;
+  background-color: var(--app-bg);
+}
+
+:deep(.el-menu) {
+  background-color: transparent;
+  border-right: none;
+}
+
+:deep(.el-menu-item) {
+  color: #cbd5e1;
+}
+
+:deep(.el-menu-item:hover) {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+:deep(.el-menu-item.is-active) {
+  background-color: #1d4ed8;
+  color: #ffffff;
+}
+
+:deep(.el-menu-item .el-icon) {
+  color: inherit;
 }
 </style>

@@ -5,7 +5,8 @@ export const userList = [
     "email": "ethan.clark@example.com",
     "role": "Admin",
     "status": "Active",
-    "pwd": "123123"
+    "pwd": "123123",
+    "profile": '暂无'
   },
   {
     "id": 102,
@@ -13,7 +14,8 @@ export const userList = [
     "email": "olivia.martin@example.com",
     "role": "User",
     "status": "Active",
-    "pwd": "123123"
+    "pwd": "123123",
+    "profile": '暂无'
   },
   {
     "id": 103,
@@ -21,7 +23,9 @@ export const userList = [
     "email": "daniel.lee@example.com",
     "role": "Admin",
     "status": "Active",
-    "pwd": "123123"
+    "pwd": "123123",
+    "profile": '暂无'
+
   },
   {
     "id": 104,
@@ -29,7 +33,9 @@ export const userList = [
     "email": "sophia.walker@example.com",
     "role": "User",
     "status": "Inactive",
-    "pwd": "123123"
+    "pwd": "123123",
+    "profile": '暂无'
+
   },
   {
     "id": 105,
@@ -37,7 +43,9 @@ export const userList = [
     "email": "james.allen@example.com",
     "role": "Admin",
     "status": "Active",
-    "pwd": "123123"
+    "pwd": "123123",
+    "profile": '暂无'
+
   },
   {
     "id": 106,
@@ -45,7 +53,9 @@ export const userList = [
     "email": "emma.scott@example.com",
     "role": "User",
     "status": "Active",
-    "pwd": "123123"
+    "pwd": "123123",
+    "profile": '暂无'
+
   },
   {
     "id": 107,
@@ -53,7 +63,9 @@ export const userList = [
     "email": "william.harris@example.com",
     "role": "User",
     "status": "Inactive",
-    "pwd": "123123"
+    "pwd": "123123",
+    "profile": '暂无'
+
   },
   {
     "id": 108,
@@ -61,7 +73,9 @@ export const userList = [
     "email": "ava.turner@example.com",
     "role": "Admin",
     "status": "Active",
-    "pwd": "123123"
+    "pwd": "123123",
+    "profile": '暂无'
+
   },
   {
     "id": 109,
@@ -69,7 +83,9 @@ export const userList = [
     "email": "benjamin.young@example.com",
     "role": "User",
     "status": "Active",
-    "pwd": "123123"
+    "pwd": "123123",
+    "profile": '暂无'
+
   },
   {
     "id": 110,
@@ -77,6 +93,8 @@ export const userList = [
     "email": "mia.adams@example.com",
     "role": "User",
     "status": "Inactive",
-    "pwd": "123123"
+    "pwd": "123123",
+    "profile": '暂无'
+
   }
 ]

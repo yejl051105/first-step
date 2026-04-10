@@ -1,13 +1,22 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
-import { getUserList, setUserList } from '@/api/handleUserList';
+import { onMounted, ref } from 'vue';
+import { getUserList } from '@/api/handleUserList';
 import { getEchart } from '@/api/getEchart';
+import { caculateAdmins, caculateStatus } from '@/api/handleUserList';
 
 let userlist = getUserList()
-let length =  userlist.length
+let totalLength = ref(userlist.length)
+let activeUsers = ref(0)
+let adminUsers = ref(0)
+let inActiveUsers = ref(0)
 
 onMounted(() => {
-  getEchart()
+  activeUsers.value = caculateStatus(userlist, totalLength)
+  adminUsers.value = caculateAdmins(userlist, totalLength)
+  inActiveUsers.value = totalLength.value - activeUsers.value
+
+  // 因为Echart图标的容器要获取DOM元素 所以必须在onMounted钩子里才行 
+  getEchart(totalLength.value,activeUsers.value, inActiveUsers.value, adminUsers.value)
 })
 
 </script>
@@ -19,7 +28,7 @@ onMounted(() => {
       <div class="total-users item">
         <div class="number">
           <div class="title">Total Users</div>
-          <h1 class="digit">{{length}}</h1>
+          <h1 class="digit">{{ totalLength }}</h1>
         </div>
         <div class="icon">
           <el-avatar size="large">
@@ -29,8 +38,8 @@ onMounted(() => {
       </div>
       <div class="active-users item">
         <div class="number">
-          <div class="title">Active Today</div>
-          <h1 class="digit">1248</h1>
+          <div class="title">Active Users</div>
+          <h1 class="digit">{{ activeUsers }}</h1>
         </div>
         <div class="icon">
           <el-avatar size="large">
@@ -38,10 +47,10 @@ onMounted(() => {
           </el-avatar>
         </div>
       </div>
-      <div class="register-users item">
+      <div class="inactive-users item">
         <div class="number">
-          <div class="title">New Registrations</div>
-          <h1 class="digit">48</h1>
+          <div class="title">Inactive Users</div>
+          <h1 class="digit">{{ inActiveUsers }}</h1>
         </div>
         <div class="icon">
           <el-avatar size="large">
@@ -52,7 +61,7 @@ onMounted(() => {
       <div class="admin-accounts item">
         <div class="number">
           <div class="title">Admin Accounts</div>
-          <h1 class="digit">50</h1>
+          <h1 class="digit">{{ adminUsers }}</h1>
         </div>
         <div class="icon">
           <el-avatar size="large">
@@ -77,11 +86,13 @@ onMounted(() => {
   flex-direction: column;
   height: 100vh;
   padding: 15px;
+  color: var(--app-text);
 }
 
 .header {
   padding-bottom: 10px;
-  border-bottom: 1px solid red;
+  border-bottom: 1px solid var(--app-border);
+  color: var(--app-text);
 }
 
 .data {
@@ -95,7 +106,7 @@ onMounted(() => {
 }
 
 .data>div {
-  background-color: blue;
+  color: var(--app-text);
 }
 
 .item {
@@ -105,13 +116,74 @@ onMounted(() => {
   align-items: center;
 }
 
+.title {
+  color: var(--app-text-muted);
+}
+
+.digit {
+  color: var(--app-primary);
+}
+
+.total-users {
+  background-color: #eff6ff;
+}
+
+.active-users {
+  background-color: #ecfdf5;
+}
+
+.inactive-users {
+  background-color: #fff7ed;
+}
+
+.admin-accounts {
+  background-color: #f5f3ff;
+}
+
+.total-users .digit {
+  color: #1d4ed8;
+}
+
+.active-users .digit {
+  color: #0f766e;
+}
+
+.inactive-users .digit {
+  color: #b45309;
+}
+
+.admin-accounts .digit {
+  color: #6d28d9;
+}
+
 #icon {
   width: 100%;
   height: 100%;
+  color: currentColor;
+}
+
+.total-users :deep(.el-avatar) {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.active-users :deep(.el-avatar) {
+  background-color: #d1fae5;
+  color: #0f766e;
+}
+
+.inactive-users :deep(.el-avatar) {
+  background-color: #ffedd5;
+  color: #b45309;
+}
+
+.admin-accounts :deep(.el-avatar) {
+  background-color: #ede9fe;
+  color: #6d28d9;
 }
 
 #visualize-data {
-  background-color: pink;
+  background-color: var(--app-surface);
   flex: 1;
 }
 </style>

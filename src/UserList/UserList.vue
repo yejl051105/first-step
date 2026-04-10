@@ -1,8 +1,9 @@
 <script setup>
-import { getUserList, setUserList } from "@/api/handleUserList";
+import { getLoginUser, getUserList, setUserList } from "@/api/handleUserList";
 import { userList } from "@/mock/table_list";
 import { ElMessage } from "element-plus";
 import { onBeforeUnmount, onMounted, reactive, ref } from "vue";
+import isEqual from 'lodash/isEqual';
 
 // 设置防抖的定时器
 let saveTimer = null
@@ -218,12 +219,30 @@ const handleEditCancel = () => {
 
 // 点击弹窗中的 Yes 后，才真正执行删除
 const handleComfirm = () => {
+  // 先获取登录的用户 判断是否有删除用户的权限
+  const loginUser = getLoginUser()[0]
+  if (loginUser.role !== "Admin") {
+    deleteDialogVisible.value = false
+    return ElMessage.error("非管理员用户无法删除用户数据")
+  }
+
+  // 获取当前本地存储的用户数据
   const currentUserList = getUserList()
+
   // 如果本地用户数据存在 才执行下面的操作
   if (currentUserList) {
     const deleteUserIndex = currentUserList.findIndex(item => item.id === deleteUserId.value)
 
     if (deleteUserIndex !== -1) {
+      // 获取当前删除的用户
+      const currentUser = currentUserList[deleteUserIndex]
+
+      // 判断当前登录的用户和删除的用户是否一样 如果用户一样就无法删除
+      if (isEqual(currentUser, loginUser)) {
+        deleteDialogVisible.value = false
+        return ElMessage.error("不可以删除当前正在登录的用户")
+      }
+
       currentUserList.splice(deleteUserIndex, 1)
       setUserList(currentUserList)
     }
@@ -457,11 +476,13 @@ const handleAddCancel = () => {
 <style scoped>
 .container {
   padding: 15px;
+  color: var(--app-text);
 }
 
 .header {
   padding-bottom: 10px;
-  border-bottom: 1px solid red;
+  border-bottom: 1px solid var(--app-border);
+  color: var(--app-text);
 }
 
 .table-header {
@@ -469,10 +490,12 @@ const handleAddCancel = () => {
   justify-content: space-between;
   align-items: center;
   margin-top: 20px;
+  color: var(--app-text);
 }
 
 .title {
   margin-right: 5px;
+  color: var(--app-text-muted);
 }
 
 .keyWord {
@@ -493,6 +516,13 @@ const handleAddCancel = () => {
 
 .table {
   margin-top: 20px;
+  --el-table-border-color: var(--app-border);
+  --el-table-header-bg-color: var(--app-surface-soft);
+  --el-table-header-text-color: var(--app-text);
+  --el-table-text-color: var(--app-text);
+  --el-table-tr-bg-color: var(--app-surface);
+  --el-table-row-hover-bg-color: #f8fbff;
+  --el-table-current-row-bg-color: #eef4ff;
 }
 
 .pagination {
@@ -501,16 +531,48 @@ const handleAddCancel = () => {
   justify-content: right;
   padding: 20px;
   margin-top: 35px;
-  border-top: 1px solid gray;
+  border-top: 1px solid var(--app-border);
+  color: var(--app-text-muted);
 }
 
 .records {
   margin-left: 10px;
+  color: var(--app-text-muted);
 }
 
 .form-container {
-  border-top: 1px solid;
-  border-bottom: 1px solid;
+  border-top: 1px solid var(--app-border);
+  border-bottom: 1px solid var(--app-border);
   padding: 20px;
+  color: var(--app-text);
+}
+
+.table :deep(.el-table__empty-text) {
+  color: var(--app-text-muted);
+}
+
+.keyWord :deep(.el-button:nth-of-type(1)) {
+  background-color: #eef2f7;
+  border-color: var(--app-border);
+  color: var(--app-text-muted);
+}
+
+.keyWord :deep(.el-button:nth-of-type(2)),
+.search :deep(.el-button) {
+  background-color: var(--app-primary);
+  border-color: var(--app-primary);
+  color: #ffffff;
+}
+
+.keyWord :deep(.el-button:nth-of-type(2)):hover,
+.search :deep(.el-button):hover {
+  background-color: #1e40af;
+  border-color: #1e40af;
+}
+
+.dialog-footer :deep(.el-button:not(.el-button--primary)) {
+  background-color: #eef2f7;
+  border-color: var(--app-border);
+  color: var(--app-text-muted);
 }
 </style>
