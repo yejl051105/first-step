@@ -1,37 +1,63 @@
 <script setup>
-import { reactive } from 'vue'
-import { getLoginUser, updateSettings } from '@/api/handleUserList'
+import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useUserStore } from '@/stores/userlist'
+import { storeToRefs } from 'pinia'
 
-// 获取当前登录的用户 为了回填个人资料信息
-const loginUser = getLoginUser()[0] ?? {}
+const userStore = useUserStore()
+const { loginUser, userlist } = storeToRefs(userStore)
 
 // 根据当前登录的用户 绑定settings表单数据 回填信息
-let settingsForm = reactive({
-  username: loginUser.username ?? '',
-  email: loginUser.email ?? '',
-  role: loginUser.role ?? '',
-  profile: loginUser.profile ?? '',
-  status: loginUser.status ?? '',
-  id: loginUser.id
+let settingsForm = ref({
+  username: loginUser.value.username ?? '',
+  email: loginUser.value.email ?? '',
+  role: loginUser.value.role ?? '',
+  profile: loginUser.value.profile ?? '',
+  status: loginUser.value.status ?? '',
+  id: loginUser.value.id
 })
 
+// 获取表单实例
+const formRef = ref(null)
+
 // 表单校验规则
+const rules = {
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { min: 3, max: 15, message: '用户名长度需在 3 到 15 个字符之间', trigger: 'blur' }
+  ],
+  email: [
+    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' },
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+  ],
+  role: [
+    { required: true, message: '请选择角色', trigger: 'change' }
+  ]
+}
 
 // cancel按钮事件
 const reset = () => {
-  // 如果重置之前已经保存了一遍新的个人资料 需要重新获取新的用户数据为
-  const newLoginUser = getLoginUser()[0]
-  if (newLoginUser) {
-    Object.assign(settingsForm, newLoginUser)
-    ElMessage.success('表单重置成功')
-  }
+  // 直接获取最近一次更新的loginuser的数据填充即可
+  Object.assign(settingsForm.value,loginUser.value)
+  ElMessage.success('表单重置成功')
 }
 
 // save changes按钮事件
-const saveChanges = () => {
-  updateSettings({ ...settingsForm })
-  ElMessage.success('更新个人资料成功')
+const saveChanges = async () => {
+  try {
+    // 先判断表单字段是否符合表单校验规则
+    await formRef.value.validate()
+    // 先找到这个loginuser在数组的位置 再更新这个值到原来的位置 这样就完成了用户数组的更新
+    const index = userlist.value.findIndex(item => item.id === settingsForm.value.id)
+    Object.assign(userlist.value[index], settingsForm.value)
+    // 还需要更新loginuser的值 这是因为Home组件使用了loginuser的用户名 如果只更新了userlist 不更新loginuser 那么Home组件的欢迎标题不会改变的
+    // 这里用了浅拷贝 是因为 如果用 loginUser.value = settingsForm.value 相当于把地址给了loginUser.value loginUser是ref对象 这个值变了就会一起变
+    // 如果settingsForm.value 变了 就会导致loginUser也跟着同步变
+    Object.assign(loginUser.value,settingsForm.value)
+    ElMessage.success('更新个人资料成功')
+  } catch (error) {
+    return ElMessage.error('表单校验失败')
+  }
 }
 
 const options = [
@@ -44,21 +70,20 @@ const options = [
     label: 'User',
   }
 ]
-
 </script>
 
 <template>
   <div class="container">
     <h2 class="header">Basic Settings</h2>
     <div class="information">
-      <el-form label-position="top" class="form" :model="settingsForm">
-        <el-form-item label="Username:" class="item">
+      <el-form label-position="top" class="form" ref="formRef" :model="settingsForm" :rules="rules">
+        <el-form-item label="Username:" class="item" prop="username">
           <el-input v-model="settingsForm.username" style="width: 360px"> </el-input>
         </el-form-item>
-        <el-form-item label="Email:" class="item">
+        <el-form-item label="Email:" class="item" prop="email">
           <el-input v-model="settingsForm.email" style="width: 360px"> </el-input>
         </el-form-item>
-        <el-form-item label="Role:" class="item">
+        <el-form-item label="Role:" class="item" prop="role">
           <el-select v-model="settingsForm.role" placeholder="Select" style="width: 360px">
             <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"
               :disabled="true" />

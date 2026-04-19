@@ -1,8 +1,7 @@
 import * as echarts from 'echarts';
 
-export function getEchart(totalLength, activeUsers, inActiveUsers, adminUsers) {
-  const chartDom = document.getElementById('visualize-data');
-  const myChart = echarts.init(chartDom);
+export function getEchart(chartDom, totalLength, activeUsers, inActiveUsers, adminUsers, chartInstance = null) {
+  const myChart = chartInstance ?? echarts.init(chartDom);
 
   const option = {
     backgroundColor: 'transparent',
@@ -53,5 +52,6 @@ export function getEchart(totalLength, activeUsers, inActiveUsers, adminUsers) {
     ]
   };
 
-  option && myChart.setOption(option);
+  myChart.setOption(option);
+  return myChart;
 }

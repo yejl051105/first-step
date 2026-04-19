@@ -1,20 +1,24 @@
 <script setup>
-import { getLoginUser, getUserList, setUserList } from "@/api/handleUserList";
-import { userList } from "@/mock/table_list";
 import { ElMessage } from "element-plus";
 import { onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import isEqual from 'lodash/isEqual';
+import { useUserStore } from "@/stores/userlist";
+import { storeToRefs } from "pinia";
+
+const userStore = useUserStore()
+const { getUserList, setUserList, setLoginUser } = userStore
+const { loginUser, userlist } = storeToRefs(userStore)
 
 // 设置防抖的定时器
 let saveTimer = null
 
 // 获取用户数据和给表格数组赋值
-const localUserList = getUserList(userList)
-let tableList = ref(localUserList)
+let tableList = ref(getUserList())
 
 // 获取选中的用户
 const editUserId = ref(null)
 const deleteUserId = ref(null)
+
 const total = ref(tableList.value.length)
 
 // 控制编辑框的显示和隐藏
@@ -45,15 +49,18 @@ const rules = reactive({
 })
 
 // 编辑用户的表单数据
-const editUserMessage = reactive({
+const editUserMessage = ref({
   username: '',
   email: '',
   role: '',
-  status: ''
+  status: '',
+  id: '',
+  profile: '',
+  pwd: ''
 })
 
 // 新增用户的表单数据
-const addUserMessage = reactive({
+const addUserMessage = ref({
   username: '',
   email: '',
   role: '',
@@ -167,21 +174,28 @@ const handleRest = () => {
 const handleEdit = (scope, index, row) => {
   // 开启编辑弹窗
   editDialogVisible.value = true
-  // 获取编辑框的用户信息
+  // 获取编辑框的用户信息 用来回填数据的
   const oldUserMessage = {
     username: row.username,
     email: row.email,
     role: row.role,
-    status: row.status
+    status: row.status,
+    id: row.id,
+    profile: row.profile,
+    pwd: row.pwd
   }
-  // 防止丢失响应式数据
-  Object.assign(editUserMessage, oldUserMessage)
+  editUserMessage.value = oldUserMessage
   // 获取当前编辑用户的id
   editUserId.value = row.id
 }
 
 // 处理编辑用户的保存事件，使用防抖避免短时间内重复点击多次保存
 const handleSaveOfEdit = () => {
+  // 判断当前编辑的用户和登录的用户是否值完全相等 如果相等但不是管理员用户则不可以编辑自身之外的用户
+  if (!isEqual(loginUser.value, editUserMessage.value) && loginUser.value.role !== 'Admin' && loginUser.value.id !== editUserId.value) {
+    return ElMessage.error('非管理员只能编辑自身')
+  }
+
   // 设置保存按钮防抖
   if (saveTimer) clearTimeout(saveTimer)
 
@@ -195,17 +209,25 @@ const handleSaveOfEdit = () => {
       const userList = getUserList()
       // 如果本地用户数据存在 才能进行下面的操作
       if (userList) {
-        userList.forEach(item => {
+        userList.forEach((item, index) => {
           if (item.id === editUserId.value) {
-            Object.assign(item, editUserMessage)
+            // 先更新新的值在对应用户数组的位置上 再存储新的用户数组到pinia和本地
+            userList[index] = editUserMessage.value
+            setUserList(userList)
+          }
+          // 如果编辑了当前登录的用户 需要更新pinia的loginUser对象 并且欢迎标题也需要更改
+          if (editUserId.value === item.id && editUserId.value === loginUser.value.id) {
+            // item是旧的值 所以需要变成新的值在存入
+            item = userList[index]
+            setLoginUser(item)
           }
         })
-        setUserList(userList)
         handleSearch(searchMessage)
       }
     } catch (error) {
       return ElMessage.error("表单校验失败")
     } finally {
+      // 不管怎么样 最后都是清空定时器
       saveTimer = null
     }
   }, 500)
@@ -220,8 +242,7 @@ const handleEditCancel = () => {
 // 点击弹窗中的 Yes 后，才真正执行删除
 const handleComfirm = () => {
   // 先获取登录的用户 判断是否有删除用户的权限
-  const loginUser = getLoginUser()[0]
-  if (loginUser.role !== "Admin") {
+  if (loginUser.value.role !== "Admin") {
     deleteDialogVisible.value = false
     return ElMessage.error("非管理员用户无法删除用户数据")
   }
@@ -238,13 +259,16 @@ const handleComfirm = () => {
       const currentUser = currentUserList[deleteUserIndex]
 
       // 判断当前登录的用户和删除的用户是否一样 如果用户一样就无法删除
-      if (isEqual(currentUser, loginUser)) {
+      if (isEqual(currentUser, loginUser.value)) {
         deleteDialogVisible.value = false
         return ElMessage.error("不可以删除当前正在登录的用户")
       }
 
+      // 删除用户
       currentUserList.splice(deleteUserIndex, 1)
+      // 删除完用户 设置新的本地用户数据
       setUserList(currentUserList)
+      ElMessage.success('删除用户成功')
     }
 
     // 如果当前页删空了，就自动退回上一页
@@ -280,28 +304,28 @@ const handleSaveOfAdd = () => {
     try {
       await addFormRef.value.validate()
       // 获取到新用户的数据
-      let newUser = addUserMessage
-      // 先获取本地存储的用户数据数组
-      const userList = JSON.parse(localStorage.getItem("userList"))
+      let newUser = addUserMessage.value
       // 当用户数据列表为空时
-      if (!userList.length) {
-        const lastID = 0
+      if (!userlist.value.length) {
+        const lastID = 100
         // 为新添加的用户添加新的对象属性 id 并且把id属性放在对象属性的最前面
         const id = lastID + 1
         newUser = Object.assign({ id }, newUser)
         newUser.pwd = "123123"
+        newUser.profile = '暂无'
       } else {
         // 当用户数据列表不为空时 获取到当前本地用户数据数组的最后一位用户的id
-        const lastID = userList[userList.length - 1].id
+        const lastID = userlist.value[userlist.value.length - 1].id
         // 为新添加的用户添加新的对象属性 id 并且把id属性放在对象属性的最前面
         const id = lastID + 1
         newUser = Object.assign({ id }, newUser)
         newUser.pwd = "123123"
+        newUser.profile = '暂无'
       }
       // 在本地用户数据数组的末尾插入新的用户数据
-      userList.push(newUser)
+      userlist.value.push(newUser)
       // 把新的用户数据数组重新存储到本地
-      localStorage.setItem("userList", JSON.stringify(userList))
+      setUserList(userlist.value)
       // 关闭新增用户弹窗
       addDialogVisible.value = false
       // 清空新增用户表单数据
@@ -311,9 +335,9 @@ const handleSaveOfAdd = () => {
         role: '',
         status: ''
       }
-      Object.assign(addUserMessage, newAddUserMessage)
+      Object.assign(addUserMessage.value, newAddUserMessage)
       // 新增用户后能立刻看到新增的用户数据
-      let currentPage = Math.ceil(userList.length / searchMessage.pageSize)
+      let currentPage = Math.ceil(userlist.value.length / searchMessage.pageSize)
       searchMessage.currentPage = currentPage
       // 按当前搜索条件重新刷新表格数据
       handleSearch(searchMessage)

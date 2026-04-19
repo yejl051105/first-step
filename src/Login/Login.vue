@@ -1,22 +1,25 @@
 <script setup>
-import { getUserList, recordUser } from "@/api/handleUserList"
-import { userList } from "@/mock/table_list"
 import router from "@/router"
 import { ElMessage } from "element-plus"
 import 'element-plus/es/components/message/style/css'
-import { ref, reactive } from "vue"
+import { ref, reactive, onMounted } from "vue"
+import { useUserStore } from "@/stores/userlist"
+import { storeToRefs } from "pinia"
+
+const userStore = useUserStore()
+const { userlist } = storeToRefs(userStore)
+const { setUserList, setLoginUser, setToken } = userStore
 
 // 获取表单实例
 const FormRef = ref(null)
 
-// 获取本地存储的用户数据 用来判断密码和账号是否正确
-const userlist = reactive(getUserList(userList))
+let userList = ref(null)
 
-// 获取当前登录的用户
-let currentUser = reactive({})
-
-// 假的token 因为我们还没写后端
-const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFkbWluIiwiaWF0IjoxNTE2MjM5MDIyfQ.qS8B_p7rX9jXv-Bq3u_Lp9qG_uP9M_fW8B_p7rX9jXv'
+onMounted(() => {
+  // 先获取本地存储的用户数据 用来判断密码和账号是否正确
+  setUserList()
+  userList.value = userlist.value
+})
 
 // 表单绑定
 const FormData = ref({
@@ -25,46 +28,35 @@ const FormData = ref({
 })
 
 // 登录事件
-const login = async (FormData) => {
+const login = async () => {
   // 获取不到表单元素 防止报错
   if (!FormRef.value) return
   try {
     // 表单校验
     await FormRef.value.validate()
   } catch (error) {
-    return
+    return ElMessage.error('登录失败')
   }
 
-  // 姓名或密码错误 登录失败
-  for (let i = 0; i <= userlist.length; i++) {
-    // 如果有一个匹配的账号和密码 就直接退出循环 进入登录的后续程序
-    if (i === userlist.length) {
-      ElMessage.error('姓名或密码错误,请重新输入')
-      FormData.username = FormData.password = ''
-      return
-    }
-    // 判断登录表单填写的内容是否和找到的第一个账户相同 相同则登录成功 并且赋值给currentUser
-    if (FormData.username === userlist[i].username && FormData.password === userlist[i].pwd) {
-      Object.assign(currentUser, userlist[i])
-      break
-    }
-  }
-
-  // 登录成功 记录当前登录的用户到本地
-  recordUser(currentUser)
-
-  // 清空登录表单 提示登录成功
-  FormData.username = FormData.password = ''
-  ElMessage({
-    message: "登录成功,即将跳转首页",
-    type: "success",
-    placement: "top"
+  // 如果在userList里面找不到对应的学生 说明输入的姓名或密码错误 登录失败 
+  const loginUser = userList.value.find((item) => {
+    // 不要忘记return 每次都会忘记的点
+    return item.username === FormData.value.username && FormData.value.password === item.pwd
   })
+  // 如果找不到对应的登录用户 就直接提示错误 并且return
+  if (!loginUser) {
+    return ElMessage.error('登录失败 用户名或密码错误')
+  }
+
+  // 如果找到对应的用户 就保存登录的用户
+  setLoginUser(loginUser)
+
+  // 就清空登录表单 提示登录成功
+  FormData.value.username = FormData.value.password = ''
+  ElMessage.success("登录成功,即将跳转首页")
 
   // 把token登录凭证存入本地
-  if (!localStorage.getItem('Token')) {
-    localStorage.setItem("Token", token)
-  }
+  setToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFkbWluIiwiaWF0IjoxNTE2MjM5MDIyfQ.qS8B_p7rX9jXv-Bq3u_Lp9qG_uP9M_fW8B_p7rX9jXv')
 
   // 延时页面跳转 为了显示登录成功的提示信息
   setTimeout(() => {
@@ -107,7 +99,7 @@ const rules = reactive({
           </el-form-item>
         </el-form>
         <div class="btn">
-          <el-button @click="login(FormData)" class="btn">Login</el-button>
+          <el-button @click="login" class="btn">Login</el-button>
           <div>Forgot Password?</div>
         </div>
       </div>

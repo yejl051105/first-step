@@ -1,24 +1,51 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { getUserList } from '@/api/handleUserList';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { getEchart } from '@/api/getEchart';
-import { caculateAdmins, caculateStatus } from '@/api/handleUserList';
+import { useUserStore } from "@/stores/userlist"
+import { storeToRefs } from 'pinia';
 
-let userlist = getUserList()
-let totalLength = ref(userlist.length)
-let activeUsers = ref(0)
-let adminUsers = ref(0)
-let inActiveUsers = ref(0)
+const userStore = useUserStore()
+const { userlist } = storeToRefs(userStore)
 
-onMounted(() => {
-  activeUsers.value = caculateStatus(userlist, totalLength)
-  adminUsers.value = caculateAdmins(userlist, totalLength)
-  inActiveUsers.value = totalLength.value - activeUsers.value
+const chartDom = ref(null)
+let chartInstance = null
 
-  // 因为Echart图标的容器要获取DOM元素 所以必须在onMounted钩子里才行 
-  getEchart(totalLength.value,activeUsers.value, inActiveUsers.value, adminUsers.value)
+const safeUserList = computed(() => userlist.value ?? [])
+const totalLength = computed(() => safeUserList.value.length)
+const activeUsers = computed(() => {
+  return safeUserList.value.filter(item => item.status === 'Active').length
+})
+const adminUsers = computed(() => {
+  return safeUserList.value.filter(item => item.role === 'Admin').length
+})
+const inActiveUsers = computed(() => totalLength.value - activeUsers.value)
+
+const updateChart = () => {
+  if (!chartDom.value) return
+
+  chartInstance = getEchart(
+    chartDom.value,
+    totalLength.value,
+    activeUsers.value,
+    inActiveUsers.value,
+    adminUsers.value,
+    chartInstance
+  )
+}
+
+onMounted(async () => {
+  await nextTick()
+  updateChart()
 })
 
+watch([totalLength, activeUsers, inActiveUsers, adminUsers], () => {
+  updateChart()
+})
+
+onBeforeUnmount(() => {
+  chartInstance?.dispose()
+  chartInstance = null
+})
 </script>
 
 <template>
@@ -70,7 +97,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <div id="visualize-data"> </div>
+    <div id="visualize-data" ref="chartDom"> </div>
   </div>
 </template>
 

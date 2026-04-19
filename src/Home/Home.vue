@@ -1,33 +1,44 @@
   <script setup>
-  import { logout, loginUserState } from '@/api/handleUserList';
   import router from '@/router';
   import { ElMessage } from 'element-plus';
-  import { computed } from 'vue';
+  import { computed, ref, watch, watchEffect } from 'vue';
   import { useRoute } from 'vue-router';
+  import { useUserStore } from '@/stores/userlist';
+  import { storeToRefs } from 'pinia';
+
+  const userStore = useUserStore()
+  const { loginUser } = storeToRefs(userStore)
+  const { removeLoginUser, removeToken } = userStore
 
   const route = useRoute()
   const activeIndex = computed(() => route.path)
-  const loginUserName = computed(() => loginUserState.value?.username ?? '')
+
+  let loginuser = ref()
+
+  // 用监听器去监听登录用户的变化 从而去更新欢迎标题
+  watch(loginUser, () => {
+    loginuser.value = loginUser.value
+  }, { immediate: true })
 
   // 处理退出登录事件
   const handleConfirm = () => {
     // 退出登录 清除登录凭证 Token 和 清除登录用户 loginUser
-    logout()
+    removeToken()
+    removeLoginUser()
     ElMessage.warning('即将退出至登录页面')
     setTimeout(() => {
       router.push({ name: 'login' })
     }, 1000);
   }
-
 </script>
 
   <template>
     <div class="contaier">
       <el-container class="body">
         <el-header class="header">
-          <h2 class="left">Vue3 Demo Admin</h2>
+          <h2 class="left">Vue3 Admin System</h2>
           <div class="right">
-            <div class="greeting">Welcome, <strong>{{ loginUserName }}</strong></div>
+            <div class="greeting">Welcome, <strong>{{ loginuser?.username }}</strong></div>
             <div class="logout">
               <el-popconfirm title="Are you sure to logout?" @confirm="handleConfirm">
                 <template #reference>
@@ -56,8 +67,6 @@
       </el-container>
     </div>
   </template>
-
-
 
 <style scoped>
 * {
