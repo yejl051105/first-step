@@ -2,7 +2,7 @@ export const userList = [
   {
     "id": 101,
     "username": "ethan.clark",
-    "email": "ethan.clark@example.com",
+    "email": "ethan.clark@gmail.com",
     "role": "Admin",
     "status": "Active",
     "pwd": "123123",
@@ -11,7 +11,7 @@ export const userList = [
   {
     "id": 102,
     "username": "olivia.martin",
-    "email": "olivia.martin@example.com",
+    "email": "olivia.martin@gmail.com",
     "role": "User",
     "status": "Active",
     "pwd": "123123",
@@ -20,7 +20,7 @@ export const userList = [
   {
     "id": 103,
     "username": "daniel.lee",
-    "email": "daniel.lee@example.com",
+    "email": "daniel.lee@gmail.com",
     "role": "Admin",
     "status": "Active",
     "pwd": "123123",
@@ -30,7 +30,7 @@ export const userList = [
   {
     "id": 104,
     "username": "sophia.walker",
-    "email": "sophia.walker@example.com",
+    "email": "sophia.walker@gmail.com",
     "role": "User",
     "status": "Inactive",
     "pwd": "123123",
@@ -40,7 +40,7 @@ export const userList = [
   {
     "id": 105,
     "username": "james.allen",
-    "email": "james.allen@example.com",
+    "email": "james.allen@gmail.com",
     "role": "Admin",
     "status": "Active",
     "pwd": "123123",
@@ -50,7 +50,7 @@ export const userList = [
   {
     "id": 106,
     "username": "emma.scott",
-    "email": "emma.scott@example.com",
+    "email": "emma.scott@gmail.com",
     "role": "User",
     "status": "Active",
     "pwd": "123123",
@@ -60,7 +60,7 @@ export const userList = [
   {
     "id": 107,
     "username": "william.harris",
-    "email": "william.harris@example.com",
+    "email": "william.harris@gmail.com",
     "role": "User",
     "status": "Inactive",
     "pwd": "123123",
@@ -70,7 +70,7 @@ export const userList = [
   {
     "id": 108,
     "username": "ava.turner",
-    "email": "ava.turner@example.com",
+    "email": "ava.turner@gmail.com",
     "role": "Admin",
     "status": "Active",
     "pwd": "123123",
@@ -80,7 +80,7 @@ export const userList = [
   {
     "id": 109,
     "username": "benjamin.young",
-    "email": "benjamin.young@example.com",
+    "email": "benjamin.young@gmail.com",
     "role": "User",
     "status": "Active",
     "pwd": "123123",
@@ -90,7 +90,7 @@ export const userList = [
   {
     "id": 110,
     "username": "mia.adams",
-    "email": "mia.adams@example.com",
+    "email": "mia.adams@gmail.com",
     "role": "User",
     "status": "Inactive",
     "pwd": "123123",

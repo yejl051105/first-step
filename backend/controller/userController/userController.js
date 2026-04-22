@@ -5,7 +5,8 @@ let userlist = require("../userData/userData")
 exports.getALlUser = (req, res) => {
   res.json({
     code: 200,
-    data: userlist
+    data: userlist,
+    message: '获取用户数据成功'
   })
 }
 
@@ -22,6 +23,8 @@ exports.deleteUser = (req, res) => {
     const deleteUser = userlist[deleteUserIndex]
     if (deleteUserIndex !== -1) {
       userlist.splice(deleteUserIndex, 1)
+    } else {
+      throw new error("用户不存在")
     }
     res.json({
       code: 200,
@@ -30,7 +33,7 @@ exports.deleteUser = (req, res) => {
     })
   } catch (error) {
     res.json({
-      code: 400,
+      code: 500,
       message: '删除用户失败',
     })
   }
@@ -84,6 +87,27 @@ exports.updateUser = (req, res) => {
     res.json({
       code: 400,
       message: '更新用户失败'
+    })
+  }
+}
+
+// 设置新的用户数据
+exports.setNewUserList = (req, res) => {
+  try {
+    const newUserListArray = req.body
+    if (newUserListArray) {
+      userlist.splice(0, userlist.length, ...newUserListArray)
+      console.log(userlist)
+      res.json({
+        code: 201,
+        message: "设置新的用户数据成功",
+        data: newUserListArray
+      })
+    }
+  } catch (error) {
+    res.json({
+      code: 500,
+      message: "设置新的用户数据失败"
     })
   }
 }

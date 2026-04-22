@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
-import { userList } from '@/mock/table_list'
 import { ref } from 'vue'
+import { getAllUser, setNewUser } from '@/api/user'
 
 export const useUserStore = defineStore('user', () => {
   // 当前登录的用户
@@ -15,26 +15,27 @@ export const useUserStore = defineStore('user', () => {
   // action方法都是用来修改state和getter数据的 很多时候都是更新和删除这个states和getter的值用的
   // 很少用来获取states和getter 因为可以直接用states和getter获取值
 
-  // 获取当前的用户列表数据
-  function getUserList() {
-    return userlist.value
+  // 获取用户数据数组
+  async function getUserList() {
+    try {
+      const res = await getAllUser()
+      userlist.value = res.data.data
+      return userlist.value
+    } catch (error) {
+      console.log("获取用户数据数组失败")
+    }
   }
 
   // 设置新的用户列表数据
-  function setUserList(newUserList = null) {
-    // 先判断当前userlist.value是否有值 如果没有就使用mock的数据
-    if (!userlist.value) userlist.value = userList
-    else if (!newUserList && userlist.value) {
-      // 如果没有传参数进来 而且这个userlist.value还有值 那么就使用原来的userlist的值
-      return
-    }
-    else if (newUserList) {
-      // 如果传递了参数进来 就是更新userlist.value的值 
-      userlist.value = newUserList
+  async function setUserList(newUserListArray) {
+    try {
+      const res = await setNewUser(newUserListArray)
+      // 设置了新的用户列表数据 那么要重新设置userlist的值
+      userlist.value = res.data.data
+    } catch (error) {
+      return console.log("设置新的用户数据数组失败")
     }
   }
-
-
 
   // 设置新的token
   function setToken(newToken) {

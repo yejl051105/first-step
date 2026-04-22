@@ -8,17 +8,16 @@ import { storeToRefs } from "pinia"
 
 const userStore = useUserStore()
 const { userlist } = storeToRefs(userStore)
-const { setUserList, setLoginUser, setToken } = userStore
+const { setLoginUser, setToken, getUserList } = userStore
 
 // 获取表单实例
 const FormRef = ref(null)
 
 let userList = ref(null)
 
-onMounted(() => {
+onMounted(async() => {
   // 先获取本地存储的用户数据 用来判断密码和账号是否正确
-  setUserList()
-  userList.value = userlist.value
+  userList.value = await getUserList()
 })
 
 // 表单绑定
@@ -40,7 +39,7 @@ const login = async () => {
 
   // 如果在userList里面找不到对应的学生 说明输入的姓名或密码错误 登录失败 
   const loginUser = userList.value.find((item) => {
-    // 不要忘记return 每次都会忘记的点
+    // 不要忘记return 每次都会忘记的一点
     return item.username === FormData.value.username && FormData.value.password === item.pwd
   })
   // 如果找不到对应的登录用户 就直接提示错误 并且return

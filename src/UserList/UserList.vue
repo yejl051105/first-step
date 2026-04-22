@@ -4,6 +4,7 @@ import { onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import isEqual from 'lodash/isEqual';
 import { useUserStore } from "@/stores/userlist";
 import { storeToRefs } from "pinia";
+import { addNewUser, deleteUser, updateUser } from "@/api/user";
 
 const userStore = useUserStore()
 const { getUserList, setUserList, setLoginUser } = userStore
@@ -13,7 +14,7 @@ const { loginUser, userlist } = storeToRefs(userStore)
 let saveTimer = null
 
 // 获取用户数据和给表格数组赋值
-let tableList = ref(getUserList())
+let tableList = ref(userlist.value)
 
 // 获取选中的用户
 const editUserId = ref(null)
@@ -67,6 +68,13 @@ const addUserMessage = ref({
   status: ''
 })
 
+const initialAddUserMessage = {
+  username: '',
+  email: '',
+  role: '',
+  status: ''
+}
+
 // 查找的信息  
 const searchMessage = reactive({
   keyWord: '',
@@ -112,7 +120,7 @@ const handleSearchClick = () => {
 
 // 处理搜索事件 刷新用户数据
 const handleSearch = (searchMessage) => {
-  let newList = getUserList()
+  let newList = userlist.value
   // 如果本地用户数据存在 才能进行下面的操作
   if (newList) {
     // 如果传入了关键字
@@ -170,6 +178,16 @@ const handleRest = () => {
   handleSearch(searchMessage)
 }
 
+const resetAddForm = () => {
+  Object.assign(addUserMessage.value, initialAddUserMessage)
+  addFormRef.value?.clearValidate()
+}
+
+const handleOpenAddDialog = () => {
+  resetAddForm()
+  addDialogVisible.value = true
+}
+
 // 处理编辑事件
 const handleEdit = (scope, index, row) => {
   // 开启编辑弹窗
@@ -200,30 +218,25 @@ const handleSaveOfEdit = () => {
   if (saveTimer) clearTimeout(saveTimer)
 
   saveTimer = setTimeout(async () => {
-    // 表单校验
     try {
+      // 表单校验
       await editFormRef.value.validate()
-      // 关闭编辑弹窗
-      editDialogVisible.value = false
-      // 获取本地的用户数据数组
-      const userList = getUserList()
-      // 如果本地用户数据存在 才能进行下面的操作
-      if (userList) {
-        userList.forEach((item, index) => {
-          if (item.id === editUserId.value) {
-            // 先更新新的值在对应用户数组的位置上 再存储新的用户数组到pinia和本地
-            userList[index] = editUserMessage.value
-            setUserList(userList)
-          }
-          // 如果编辑了当前登录的用户 需要更新pinia的loginUser对象 并且欢迎标题也需要更改
-          if (editUserId.value === item.id && editUserId.value === loginUser.value.id) {
-            // item是旧的值 所以需要变成新的值在存入
-            item = userList[index]
-            setLoginUser(item)
-          }
-        })
-        handleSearch(searchMessage)
+      // 如果当前的编辑用户是当前登录的用户
+      if(loginUser.value.id === editUserId.value){
+        // 需要更新当前pinia的logiUser的值
+        const newUser = editUserMessage.value
+        setLoginUser(newUser)
       }
+      // 否则直接更新用户数据中的当前用户
+      await updateUser(editUserId.value, editUserMessage.value)
+      // 获取当前最新的用户数据
+      const newUserListArray = await getUserList()
+      // 设置最新的用户数据
+      await setUserList(newUserListArray)
+      // 完成编辑用户 关闭编辑弹窗
+      editDialogVisible.value = false
+      // 立刻执行一次搜索 能够马上看到新的用户数据
+      handleSearch(searchMessage)
     } catch (error) {
       return ElMessage.error("表单校验失败")
     } finally {
@@ -240,23 +253,20 @@ const handleEditCancel = () => {
 }
 
 // 点击弹窗中的 Yes 后，才真正执行删除
-const handleComfirm = () => {
+const handleComfirm = async () => {
   // 先获取登录的用户 判断是否有删除用户的权限
   if (loginUser.value.role !== "Admin") {
     deleteDialogVisible.value = false
     return ElMessage.error("非管理员用户无法删除用户数据")
   }
 
-  // 获取当前本地存储的用户数据
-  const currentUserList = getUserList()
-
   // 如果本地用户数据存在 才执行下面的操作
-  if (currentUserList) {
-    const deleteUserIndex = currentUserList.findIndex(item => item.id === deleteUserId.value)
+  if (userlist.value) {
+    const deleteUserIndex = userlist.value.findIndex(item => item.id === deleteUserId.value)
 
     if (deleteUserIndex !== -1) {
       // 获取当前删除的用户
-      const currentUser = currentUserList[deleteUserIndex]
+      const currentUser = userlist.value[deleteUserIndex]
 
       // 判断当前登录的用户和删除的用户是否一样 如果用户一样就无法删除
       if (isEqual(currentUser, loginUser.value)) {
@@ -265,14 +275,19 @@ const handleComfirm = () => {
       }
 
       // 删除用户
-      currentUserList.splice(deleteUserIndex, 1)
-      // 删除完用户 设置新的本地用户数据
-      setUserList(currentUserList)
-      ElMessage.success('删除用户成功')
+      try {
+        const res = await deleteUser(deleteUserId.value)
+        // 删除完一个用户后需要重新调用接口 获取最新的用户数据数组 然后在设置为userlist.value的值
+        const newUserListArray = await getUserList()
+        await setUserList(newUserListArray)
+        ElMessage.success('删除用户成功')
+      } catch (error) {
+        return console.log("删除用户失败")
+      }
     }
 
     // 如果当前页删空了，就自动退回上一页
-    if ((searchMessage.currentPage - 1) * searchMessage.pageSize >= currentUserList.length && searchMessage.currentPage > 1) {
+    if ((searchMessage.currentPage - 1) * searchMessage.pageSize >= userlist.value.length && searchMessage.currentPage > 1) {
       searchMessage.currentPage -= 1
     }
 
@@ -295,8 +310,17 @@ const handleDelete = (scope, index, row) => {
   deleteDialogVisible.value = true
 }
 
-// 处理新增用户的保存事件 有个问题是 没有解决不能重名的问题
-const handleSaveOfAdd = () => {
+// 处理新增用户的保存事件
+const handleSaveOfAdd = async () => {
+  // 先查询当前的用户数据
+  const currentUserListArray = await getUserList()
+
+  // 如果能够找到重名的 就拒绝添加新用户
+  const duplicatedUser = currentUserListArray.find(item => item.username === addUserMessage.value.username)
+  if (duplicatedUser) {
+    return ElMessage.error('用户名重复,请修改用户名')
+  }
+
   // 设置保存按钮防抖
   if (saveTimer) clearTimeout(saveTimer)
   // 表单校验
@@ -322,20 +346,21 @@ const handleSaveOfAdd = () => {
         newUser.pwd = "123123"
         newUser.profile = '暂无'
       }
-      // 在本地用户数据数组的末尾插入新的用户数据
-      userlist.value.push(newUser)
-      // 把新的用户数据数组重新存储到本地
-      setUserList(userlist.value)
+      // 调用后端接口 添加新用户到用户数据
+      const res = await addNewUser(newUser)
+      console.log(res.data)
+
+      // 添加完新的用户后 需要重新调用后端接口 读取最新的用户数据
+      const newUserListArray = await getUserList()
+
+      // 再把最新的用户数据存储到userlist.value中去
+      await setUserList(newUserListArray)
+
       // 关闭新增用户弹窗
       addDialogVisible.value = false
-      // 清空新增用户表单数据
-      const newAddUserMessage = {
-        username: '',
-        email: '',
-        role: '',
-        status: ''
-      }
-      Object.assign(addUserMessage.value, newAddUserMessage)
+
+      // 清空新增用户表单数据和校验状态
+      resetAddForm()
       // 新增用户后能立刻看到新增的用户数据
       let currentPage = Math.ceil(userlist.value.length / searchMessage.pageSize)
       searchMessage.currentPage = currentPage
@@ -351,7 +376,7 @@ const handleSaveOfAdd = () => {
 
 // 处理新增用户编辑框的cancel按钮点击事件
 const handleAddCancel = () => {
-  addFormRef.value.resetFields()
+  resetAddForm()
   addDialogVisible.value = false
 }
 </script>
@@ -365,7 +390,7 @@ const handleAddCancel = () => {
         <span class="title">Search:</span>
         <el-input placeholder="keyWord" @keyup.enter="handleEnter" v-model="searchMessage.keyWord"></el-input>
         <el-button @click="handleRest">reset</el-button>
-        <el-button @click="addDialogVisible = true">Add User</el-button>
+        <el-button @click="handleOpenAddDialog">Add User</el-button>
       </div>
       <!-- 中间 -->
       <div class="role">
