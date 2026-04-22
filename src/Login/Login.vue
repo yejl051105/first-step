@@ -1,24 +1,17 @@
 <script setup>
 import router from "@/router"
 import { ElMessage } from "element-plus"
-import 'element-plus/es/components/message/style/css'
-import { ref, reactive, onMounted } from "vue"
+import "element-plus/es/components/message/style/css"
+import { ref, reactive } from "vue"
 import { useUserStore } from "@/stores/userlist"
-import { storeToRefs } from "pinia"
+import { loginByPassword } from "@/api/auth"
 
 const userStore = useUserStore()
-const { userlist } = storeToRefs(userStore)
-const { setLoginUser, setToken, getUserList } = userStore
+const { setLoginUser, setToken } = userStore
 
 // 获取表单实例
 const FormRef = ref(null)
-
-let userList = ref(null)
-
-onMounted(async() => {
-  // 先获取本地存储的用户数据 用来判断密码和账号是否正确
-  userList.value = await getUserList()
-})
+const loginLoading = ref(false)
 
 // 表单绑定
 const FormData = ref({
@@ -34,33 +27,35 @@ const login = async () => {
     // 表单校验
     await FormRef.value.validate()
   } catch (error) {
-    return ElMessage.error('登录失败')
+    return ElMessage.error("请先正确填写登录表单")
   }
 
-  // 如果在userList里面找不到对应的学生 说明输入的姓名或密码错误 登录失败 
-  const loginUser = userList.value.find((item) => {
-    // 不要忘记return 每次都会忘记的一点
-    return item.username === FormData.value.username && FormData.value.password === item.pwd
-  })
-  // 如果找不到对应的登录用户 就直接提示错误 并且return
-  if (!loginUser) {
-    return ElMessage.error('登录失败 用户名或密码错误')
+  try {
+    loginLoading.value = true
+
+    const res = await loginByPassword({
+      username: FormData.value.username,
+      pwd: FormData.value.password
+    })
+
+    const { token, userInfo } = res.data.data
+
+    setLoginUser(userInfo)
+    setToken(token)
+
+    FormData.value.username = ""
+    FormData.value.password = ""
+    ElMessage.success("登录成功,即将跳转首页")
+
+    setTimeout(() => {
+      router.push("/home")
+    }, 1000)
+  } catch (error) {
+    const message = error?.response?.data?.message || "登录失败，请稍后重试"
+    return ElMessage.error(message)
+  } finally {
+    loginLoading.value = false
   }
-
-  // 如果找到对应的用户 就保存登录的用户
-  setLoginUser(loginUser)
-
-  // 就清空登录表单 提示登录成功
-  FormData.value.username = FormData.value.password = ''
-  ElMessage.success("登录成功,即将跳转首页")
-
-  // 把token登录凭证存入本地
-  setToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFkbWluIiwiaWF0IjoxNTE2MjM5MDIyfQ.qS8B_p7rX9jXv-Bq3u_Lp9qG_uP9M_fW8B_p7rX9jXv')
-
-  // 延时页面跳转 为了显示登录成功的提示信息
-  setTimeout(() => {
-    router.push('/home')
-  }, 1000)
 }
 
 // 表单校验规则
@@ -98,7 +93,7 @@ const rules = reactive({
           </el-form-item>
         </el-form>
         <div class="btn">
-          <el-button @click="login" class="btn">Login</el-button>
+          <el-button :loading="loginLoading" @click="login" class="btn">Login</el-button>
           <div>Forgot Password?</div>
         </div>
       </div>

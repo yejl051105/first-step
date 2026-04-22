@@ -269,7 +269,7 @@ const handleComfirm = async () => {
       const currentUser = userlist.value[deleteUserIndex]
 
       // 判断当前登录的用户和删除的用户是否一样 如果用户一样就无法删除
-      if (isEqual(currentUser, loginUser.value)) {
+      if (currentUser.id === loginUser.value.id) {
         deleteDialogVisible.value = false
         return ElMessage.error("不可以删除当前正在登录的用户")
       }

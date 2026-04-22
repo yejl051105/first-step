@@ -1,113 +1,128 @@
-// 获取本地数据（类似数据库）
-let userlist = require("../userData/userData")
+const fs = require("fs");
+const path = require("path");
 
-// 获取用户的数据
+const DB_PATH = path.join(__dirname, "../userData/userData.json");
+
+const readUserList = () => {
+  const fileContent = fs.readFileSync(DB_PATH, "utf-8");
+  return JSON.parse(fileContent);
+};
+
+const saveToLocal = (data) => {
+  try {
+    fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), "utf-8");
+  } catch (err) {
+    console.error("写入文件失败:", err);
+    throw err;
+  }
+};
+
+exports.readUserList = readUserList;
+
+// --- 获取所有用户 ---
 exports.getALlUser = (req, res) => {
+  const userlist = readUserList();
+
   res.json({
     code: 200,
     data: userlist,
-    message: '获取用户数据成功'
-  })
-}
+    message: "获取用户数据成功"
+  });
+};
 
-// 删除用户数据
+// --- 删除用户 ---
 exports.deleteUser = (req, res) => {
   try {
-    // 获取删除用户的id
-    // 因为req是url地址 获取的id是字符串类型的 所以需要先转换成数字类型的id
-    const deleteUserId = Number(req.params.id)
-    // 删除用户数据（模拟数据库操作）
-    // 先找到删除的用户的索引
-    const deleteUserIndex = userlist.findIndex(item => item.id === deleteUserId)
-    // 要删除的用户
-    const deleteUser = userlist[deleteUserIndex]
-    if (deleteUserIndex !== -1) {
-      userlist.splice(deleteUserIndex, 1)
-    } else {
-      throw new error("用户不存在")
-    }
-    res.json({
-      code: 200,
-      message: '删除用户成功',
-      data: deleteUser
-    })
-  } catch (error) {
-    res.json({
-      code: 500,
-      message: '删除用户失败',
-    })
-  }
-}
+    const userlist = readUserList();
+    const deleteUserId = Number(req.params.id);
+    const deleteUserIndex = userlist.findIndex((item) => item.id === deleteUserId);
 
-// 新增用户数据
+    if (deleteUserIndex !== -1) {
+      const deleteUser = userlist[deleteUserIndex];
+      userlist.splice(deleteUserIndex, 1); // 内存删除
+
+      saveToLocal(userlist); // 持久化：同步到文件
+
+      res.json({
+        code: 200,
+        message: "删除用户成功",
+        data: deleteUser
+      });
+    } else {
+      res.status(404).json({ code: 404, message: "用户不存在" });
+    }
+  } catch (error) {
+    res.status(500).json({ code: 500, message: "删除用户失败" });
+  }
+};
+
+// --- 新增用户 ---
 exports.addUser = (req, res) => {
   try {
-    const newUser = req.body
-    userlist.push(newUser)
+    const userlist = readUserList();
+    const newUser = req.body;
+    // 简单处理：如果没有传ID，自动生成一个
+    if (!newUser.id) newUser.id = Date.now();
+
+    userlist.push(newUser); // 内存添加
+
+    saveToLocal(userlist); // 持久化
+
     res.json({
       code: 201,
-      message: '新增用户成功',
+      message: "新增用户成功",
       data: newUser
-    })
+    });
   } catch (error) {
-    res.json({
-      code: 400,
-      message: '新增用户失败'
-    })
+    res.status(400).json({ code: 400, message: "新增用户失败" });
   }
+};
 
-}
-
-// 更新用户数据
+// --- 更新用户 ---
 exports.updateUser = (req, res) => {
   try {
-    // 获取到更新的用户的id
-    const updateUserId = Number(req.params.id)
-    // 找到这个需要更新的用户在userlist的索引位置
-    const updateUserIndex = userlist.findIndex(item => item.id === updateUserId)
-    // 先判断能否找到这个用户
+    const userlist = readUserList();
+    const updateUserId = Number(req.params.id);
+    const updateUserIndex = userlist.findIndex((item) => item.id === updateUserId);
+
     if (updateUserIndex === -1) {
-      return res.json({
-        code: 404,
-        message: '该用户资源不存在,无法进行更新'
-      })
+      return res.status(404).json({ code: 404, message: "该用户资源不存在" });
     }
-    // 删除原来索引上的用户 并且更新为新的用户数据
+
     userlist[updateUserIndex] = {
       ...userlist[updateUserIndex],
       ...req.body,
-      id: updateUserId // 防止 req.body 中带有的 id 篡改原始 id
-    }
+      id: updateUserId
+    };
+
+    saveToLocal(userlist); // 持久化
+
     res.json({
       code: 200,
-      message: '更新用户成功',
+      message: "更新用户成功",
       data: userlist[updateUserIndex]
-    })
+    });
   } catch (error) {
-    res.json({
-      code: 400,
-      message: '更新用户失败'
-    })
+    res.status(400).json({ code: 400, message: "更新用户失败" });
   }
-}
+};
 
-// 设置新的用户数据
+// --- 批量重置/设置用户数据 ---
 exports.setNewUserList = (req, res) => {
   try {
-    const newUserListArray = req.body
-    if (newUserListArray) {
-      userlist.splice(0, userlist.length, ...newUserListArray)
-      console.log(userlist)
-      res.json({
-        code: 201,
-        message: "设置新的用户数据成功",
-        data: newUserListArray
-      })
+    const newUserListArray = req.body;
+    if (!Array.isArray(newUserListArray)) {
+      return res.status(400).json({ code: 400, message: "请求体必须是数组" });
     }
-  } catch (error) {
+
+    saveToLocal(newUserListArray); // 持久化
+
     res.json({
-      code: 500,
-      message: "设置新的用户数据失败"
-    })
+      code: 201,
+      message: "设置新的用户数据成功",
+      data: newUserListArray
+    });
+  } catch (error) {
+    res.status(500).json({ code: 500, message: "设置新的用户数据失败" });
   }
-}
+};

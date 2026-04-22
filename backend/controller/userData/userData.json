@@ -1,4 +1,4 @@
-let userlist = [
+[
   {
     "id": 101,
     "username": "ethan.clark",
@@ -6,7 +6,7 @@ let userlist = [
     "role": "Admin",
     "status": "Active",
     "pwd": "123123",
-    "profile": '暂无'
+    "profile": "暂无"
   },
   {
     "id": 102,
@@ -15,7 +15,7 @@ let userlist = [
     "role": "User",
     "status": "Active",
     "pwd": "123123",
-    "profile": '暂无'
+    "profile": "暂无"
   },
   {
     "id": 103,
@@ -24,7 +24,7 @@ let userlist = [
     "role": "Admin",
     "status": "Active",
     "pwd": "123123",
-    "profile": '暂无'
+    "profile": "暂无"
   },
   {
     "id": 104,
@@ -33,7 +33,7 @@ let userlist = [
     "role": "User",
     "status": "Inactive",
     "pwd": "123123",
-    "profile": '暂无'
+    "profile": "暂无"
   },
   {
     "id": 105,
@@ -42,7 +42,7 @@ let userlist = [
     "role": "Admin",
     "status": "Active",
     "pwd": "123123",
-    "profile": '暂无'
+    "profile": "暂无"
   },
   {
     "id": 106,
@@ -51,7 +51,7 @@ let userlist = [
     "role": "User",
     "status": "Active",
     "pwd": "123123",
-    "profile": '暂无'
+    "profile": "暂无"
   },
   {
     "id": 107,
@@ -60,7 +60,7 @@ let userlist = [
     "role": "User",
     "status": "Inactive",
     "pwd": "123123",
-    "profile": '暂无'
+    "profile": "暂无"
   },
   {
     "id": 108,
@@ -69,7 +69,7 @@ let userlist = [
     "role": "Admin",
     "status": "Active",
     "pwd": "123123",
-    "profile": '暂无'
+    "profile": "暂无"
   },
   {
     "id": 109,
@@ -78,7 +78,7 @@ let userlist = [
     "role": "User",
     "status": "Active",
     "pwd": "123123",
-    "profile": '暂无'
+    "profile": "暂无"
   },
   {
     "id": 110,
@@ -87,8 +87,6 @@ let userlist = [
     "role": "User",
     "status": "Inactive",
     "pwd": "123123",
-    "profile": '暂无'
+    "profile": "暂无"
   }
 ]
-
-module.exports = userlist
