@@ -1,4 +1,4 @@
-import userInstance from "@/request/axios-instance";
+import userInstance from "@/api/request";
 
 // 注意返回的都是 "promise"
 // 设置新的用户数据

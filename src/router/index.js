@@ -27,11 +27,26 @@ const router = createRouter({
 
 router.beforeEach(async (to, from) => {
   const userStore = useUserStore()
-  const { token } = storeToRefs(userStore)
+  const { token, userlist } = storeToRefs(userStore)
   const isPermision = token.value
+
+  if (to.name === 'login' && isPermision) {
+    return { path: '/home' }
+  }
+
   if (to.name !== 'login' && !isPermision) {
     ElMessage.error("没有登录权限")
     return { name: 'login' }
+  }
+
+  if (to.name !== 'login' && !Array.isArray(userlist.value)) {
+    const latestUserList = await userStore.getUserList()
+
+    if (!latestUserList) {
+      userStore.clearAuth()
+      ElMessage.error("用户数据获取失败，请重新登录")
+      return { name: 'login' }
+    }
   }
 })
 

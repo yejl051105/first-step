@@ -2,7 +2,6 @@ import * as echarts from 'echarts';
 
 export function getEchart(chartDom, totalLength, activeUsers, inActiveUsers, adminUsers, chartInstance = null) {
   const myChart = chartInstance ?? echarts.init(chartDom);
-
   const option = {
     backgroundColor: 'transparent',
     textStyle: {

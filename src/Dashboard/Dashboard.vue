@@ -1,46 +1,59 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { getEchart } from '@/api/getEchart';
-import { useUserStore } from "@/stores/userlist"
+import { useUserStore } from '@/stores/userlist';
+import { getDashboardData } from '@/api/dashboard';
 import { storeToRefs } from 'pinia';
 
-const userStore = useUserStore()
-const { userlist } = storeToRefs(userStore)
+const userstore = useUserStore()
+const { userlist } = storeToRefs(userstore)
 
-const chartDom = ref(null)
+// 看板数据
+let userLength = ref(null)
+let activeUsersCount = ref(null)
+let inactiveUsersCount = ref(null)
+let adminUsersCount = ref(null)
+
+// 获取图表渲染的DOM元素
+let chartDom = ref(null)
 let chartInstance = null
 
-const safeUserList = computed(() => userlist.value ?? [])
-const totalLength = computed(() => safeUserList.value.length)
-const activeUsers = computed(() => {
-  return safeUserList.value.filter(item => item.status === 'Active').length
-})
-const adminUsers = computed(() => {
-  return safeUserList.value.filter(item => item.role === 'Admin').length
-})
-const inActiveUsers = computed(() => totalLength.value - activeUsers.value)
+// 从接口获取的数据 赋值到当前页面的变量上
+const getData = async () => {
+  const res = await getDashboardData()
+  activeUsersCount.value = res.data.data.activeUsersCount
+  inactiveUsersCount.value = res.data.data.inactiveUsersCount
+  adminUsersCount.value = res.data.data.adminUsersCount
+  userLength.value = res.data.data.userLength
+}
 
+// 进来就先调用接口获取数据 然后渲染到图表上
+onMounted(async () => {
+  await getData()
+  await nextTick()
+  updateChart()
+})
+
+// 监听用户数据列表 进行看板数据实时更新
+watch(userlist, async () => {
+  await getData()
+  await nextTick()
+  updateChart()
+})
+
+// 更新Echarts图表
 const updateChart = () => {
   if (!chartDom.value) return
 
   chartInstance = getEchart(
     chartDom.value,
-    totalLength.value,
-    activeUsers.value,
-    inActiveUsers.value,
-    adminUsers.value,
+    userLength.value,
+    activeUsersCount.value,
+    inactiveUsersCount.value,
+    adminUsersCount.value,
     chartInstance
   )
 }
-
-onMounted(async () => {
-  await nextTick()
-  updateChart()
-})
-
-watch([totalLength, activeUsers, inActiveUsers, adminUsers], () => {
-  updateChart()
-})
 
 onBeforeUnmount(() => {
   chartInstance?.dispose()
@@ -55,7 +68,7 @@ onBeforeUnmount(() => {
       <div class="total-users item">
         <div class="number">
           <div class="title">Total Users</div>
-          <h1 class="digit">{{ totalLength }}</h1>
+          <h1 class="digit">{{ userLength }}</h1>
         </div>
         <div class="icon">
           <el-avatar size="large">
@@ -66,7 +79,7 @@ onBeforeUnmount(() => {
       <div class="active-users item">
         <div class="number">
           <div class="title">Active Users</div>
-          <h1 class="digit">{{ activeUsers }}</h1>
+          <h1 class="digit">{{ activeUsersCount }}</h1>
         </div>
         <div class="icon">
           <el-avatar size="large">
@@ -77,7 +90,7 @@ onBeforeUnmount(() => {
       <div class="inactive-users item">
         <div class="number">
           <div class="title">Inactive Users</div>
-          <h1 class="digit">{{ inActiveUsers }}</h1>
+          <h1 class="digit">{{ inactiveUsersCount }}</h1>
         </div>
         <div class="icon">
           <el-avatar size="large">
@@ -88,7 +101,7 @@ onBeforeUnmount(() => {
       <div class="admin-accounts item">
         <div class="number">
           <div class="title">Admin Accounts</div>
-          <h1 class="digit">{{ adminUsers }}</h1>
+          <h1 class="digit">{{ adminUsersCount }}</h1>
         </div>
         <div class="icon">
           <el-avatar size="large">
@@ -125,11 +138,11 @@ onBeforeUnmount(() => {
 .data {
   margin: 30px 0;
   display: grid;
-  height: 50%;
-  /* 两种写法都是一样的效果 */
+  height: calc(50% - 60px);
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: 1fr 1fr;
   gap: 20px;
+  flex-shrink: 0;
 }
 
 .data>div {
@@ -212,5 +225,6 @@ onBeforeUnmount(() => {
 #visualize-data {
   background-color: var(--app-surface);
   flex: 1;
+  min-height: 0;
 }
 </style>

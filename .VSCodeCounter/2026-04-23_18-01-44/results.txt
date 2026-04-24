@@ -1,0 +1,43 @@
+Date : 2026-04-23 18:01:44
+Directory : /Users/looong/Desktop/restart/first-step/backend
+Total : 10 files,  1616 codes, 16 comments, 57 blanks, all 1689 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| JSON       |          3 |      1,409 |          0 |          3 |      1,412 |
+| JavaScript |          7 |        207 |         16 |         54 |        277 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                           | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                              |         10 |      1,616 |         16 |         57 |      1,689 |
+| . (Files)                                                                                      |          3 |      1,331 |          3 |          7 |      1,341 |
+| config                                                                                         |          1 |          6 |          0 |          2 |          8 |
+| controller                                                                                     |          3 |        243 |          8 |         32 |        283 |
+| controller/loginController                                                                     |          1 |         51 |          1 |          8 |         60 |
+| controller/userController                                                                      |          1 |        100 |          7 |         23 |        130 |
+| controller/userData                                                                            |          1 |         92 |          0 |          1 |         93 |
+| middleware                                                                                     |          1 |         22 |          0 |          5 |         27 |
+| routes                                                                                         |          2 |         14 |          5 |         11 |         30 |
++------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                                                       | language   | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| /Users/looong/Desktop/restart/first-step/backend/app.js                                        | JavaScript |         14 |          3 |          5 |         22 |
+| /Users/looong/Desktop/restart/first-step/backend/config/jwt.js                                 | JavaScript |          6 |          0 |          2 |          8 |
+| /Users/looong/Desktop/restart/first-step/backend/controller/loginController/loginController.js | JavaScript |         51 |          1 |          8 |         60 |
+| /Users/looong/Desktop/restart/first-step/backend/controller/userController/userController.js   | JavaScript |        100 |          7 |         23 |        130 |
+| /Users/looong/Desktop/restart/first-step/backend/controller/userData/userData.json             | JSON       |         92 |          0 |          1 |         93 |
+| /Users/looong/Desktop/restart/first-step/backend/middleware/authMiddleware.js                  | JavaScript |         22 |          0 |          5 |         27 |
+| /Users/looong/Desktop/restart/first-step/backend/package-lock.json                             | JSON       |      1,298 |          0 |          1 |      1,299 |
+| /Users/looong/Desktop/restart/first-step/backend/package.json                                  | JSON       |         19 |          0 |          1 |         20 |
+| /Users/looong/Desktop/restart/first-step/backend/routes/loginRoutes.js                         | JavaScript |          5 |          0 |          3 |          8 |
+| /Users/looong/Desktop/restart/first-step/backend/routes/userRoutes.js                          | JavaScript |          9 |          5 |          8 |         22 |
+| Total                                                                                          |            |      1,616 |         16 |         57 |      1,689 |
++------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+

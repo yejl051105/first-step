@@ -17,13 +17,14 @@ const saveToLocal = (data) => {
   }
 };
 
+// --- 暴露出去是为了给loginContorller用的 ---
 exports.readUserList = readUserList;
 
 // --- 获取所有用户 ---
 exports.getALlUser = (req, res) => {
   const userlist = readUserList();
 
-  res.json({
+  res.status(200).json({
     code: 200,
     data: userlist,
     message: "获取用户数据成功"
@@ -43,7 +44,7 @@ exports.deleteUser = (req, res) => {
 
       saveToLocal(userlist); // 持久化：同步到文件
 
-      res.json({
+      res.status(200).json({
         code: 200,
         message: "删除用户成功",
         data: deleteUser
@@ -68,7 +69,7 @@ exports.addUser = (req, res) => {
 
     saveToLocal(userlist); // 持久化
 
-    res.json({
+    res.status(201).json({
       code: 201,
       message: "新增用户成功",
       data: newUser
@@ -92,12 +93,12 @@ exports.updateUser = (req, res) => {
     userlist[updateUserIndex] = {
       ...userlist[updateUserIndex],
       ...req.body,
-      id: updateUserId
+      id: updateUserId // 防止前端表单传入错误的id
     };
 
     saveToLocal(userlist); // 持久化
 
-    res.json({
+    res.status(200).json({
       code: 200,
       message: "更新用户成功",
       data: userlist[updateUserIndex]
@@ -117,7 +118,7 @@ exports.setNewUserList = (req, res) => {
 
     saveToLocal(newUserListArray); // 持久化
 
-    res.json({
+    res.status(201).json({
       code: 201,
       message: "设置新的用户数据成功",
       data: newUserListArray

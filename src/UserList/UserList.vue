@@ -1,6 +1,6 @@
 <script setup>
 import { ElMessage } from "element-plus";
-import { onBeforeUnmount, onMounted, reactive, ref } from "vue";
+import { onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
 import isEqual from 'lodash/isEqual';
 import { useUserStore } from "@/stores/userlist";
 import { storeToRefs } from "pinia";
@@ -14,7 +14,7 @@ const { loginUser, userlist } = storeToRefs(userStore)
 let saveTimer = null
 
 // 获取用户数据和给表格数组赋值
-let tableList = ref(userlist.value)
+let tableList = ref(Array.isArray(userlist.value) ? userlist.value : [])
 
 // 获取选中的用户
 const editUserId = ref(null)
@@ -88,6 +88,10 @@ onMounted(() => {
   handleSearch(searchMessage)
 })
 
+watch(userlist, () => {
+  handleSearch(searchMessage)
+}, { deep: true, immediate: true })
+
 // 在组件卸载前 都必须把定时器都清除掉
 onBeforeUnmount(() => {
   if (saveTimer) clearTimeout(saveTimer)
@@ -119,10 +123,10 @@ const handleSearchClick = () => {
 }
 
 // 处理搜索事件 刷新用户数据
-const handleSearch = (searchMessage) => {
-  let newList = userlist.value
+function handleSearch(searchMessage) {
+  let newList = Array.isArray(userlist.value) ? [...userlist.value] : []
   // 如果本地用户数据存在 才能进行下面的操作
-  if (newList) {
+  if (newList.length || Array.isArray(userlist.value)) {
     // 如果传入了关键字
     if (searchMessage.keyWord) {
       // 获取关键字
@@ -221,24 +225,28 @@ const handleSaveOfEdit = () => {
     try {
       // 表单校验
       await editFormRef.value.validate()
-      // 如果当前的编辑用户是当前登录的用户
-      if(loginUser.value.id === editUserId.value){
-        // 需要更新当前pinia的logiUser的值
-        const newUser = editUserMessage.value
-        setLoginUser(newUser)
+      const res = await updateUser(editUserId.value, editUserMessage.value)
+      const updatedUser = res.data.data
+
+      // 如果当前编辑的是当前登录用户，需要同步更新本地登录信息
+      if (loginUser.value.id === editUserId.value) {
+        setLoginUser(updatedUser)
       }
-      // 否则直接更新用户数据中的当前用户
-      await updateUser(editUserId.value, editUserMessage.value)
+
       // 获取当前最新的用户数据
       const newUserListArray = await getUserList()
+      if (!newUserListArray) {
+        return ElMessage.error("获取最新用户数据失败")
+      }
       // 设置最新的用户数据
-      await setUserList(newUserListArray)
+      setUserList(newUserListArray)
       // 完成编辑用户 关闭编辑弹窗
       editDialogVisible.value = false
       // 立刻执行一次搜索 能够马上看到新的用户数据
       handleSearch(searchMessage)
     } catch (error) {
-      return ElMessage.error("表单校验失败")
+      const message = error?.response?.data?.message || "表单校验失败"
+      return ElMessage.error(message)
     } finally {
       // 不管怎么样 最后都是清空定时器
       saveTimer = null
@@ -276,13 +284,16 @@ const handleComfirm = async () => {
 
       // 删除用户
       try {
-        const res = await deleteUser(deleteUserId.value)
+        await deleteUser(deleteUserId.value)
         // 删除完一个用户后需要重新调用接口 获取最新的用户数据数组 然后在设置为userlist.value的值
         const newUserListArray = await getUserList()
-        await setUserList(newUserListArray)
+        if (!newUserListArray) {
+          return ElMessage.error("获取最新用户数据失败")
+        }
+        setUserList(newUserListArray)
         ElMessage.success('删除用户成功')
       } catch (error) {
-        return console.log("删除用户失败")
+        return ElMessage.error("删除用户失败")
       }
     }
 
@@ -314,6 +325,9 @@ const handleDelete = (scope, index, row) => {
 const handleSaveOfAdd = async () => {
   // 先查询当前的用户数据
   const currentUserListArray = await getUserList()
+  if (!currentUserListArray) {
+    return ElMessage.error('获取用户数据失败，请稍后重试')
+  }
 
   // 如果能够找到重名的 就拒绝添加新用户
   const duplicatedUser = currentUserListArray.find(item => item.username === addUserMessage.value.username)
@@ -330,7 +344,7 @@ const handleSaveOfAdd = async () => {
       // 获取到新用户的数据
       let newUser = addUserMessage.value
       // 当用户数据列表为空时
-      if (!userlist.value.length) {
+      if (!userlist.value?.length) {
         const lastID = 100
         // 为新添加的用户添加新的对象属性 id 并且把id属性放在对象属性的最前面
         const id = lastID + 1
@@ -347,14 +361,16 @@ const handleSaveOfAdd = async () => {
         newUser.profile = '暂无'
       }
       // 调用后端接口 添加新用户到用户数据
-      const res = await addNewUser(newUser)
-      console.log(res.data)
+      await addNewUser(newUser)
 
       // 添加完新的用户后 需要重新调用后端接口 读取最新的用户数据
       const newUserListArray = await getUserList()
+      if (!newUserListArray) {
+        return ElMessage.error('获取最新用户数据失败')
+      }
 
       // 再把最新的用户数据存储到userlist.value中去
-      await setUserList(newUserListArray)
+      setUserList(newUserListArray)
 
       // 关闭新增用户弹窗
       addDialogVisible.value = false
@@ -362,12 +378,15 @@ const handleSaveOfAdd = async () => {
       // 清空新增用户表单数据和校验状态
       resetAddForm()
       // 新增用户后能立刻看到新增的用户数据
-      let currentPage = Math.ceil(userlist.value.length / searchMessage.pageSize)
+      let currentPage = Math.ceil((userlist.value?.length ?? 0) / searchMessage.pageSize)
+      if (!currentPage) currentPage = 1
       searchMessage.currentPage = currentPage
       // 按当前搜索条件重新刷新表格数据
       handleSearch(searchMessage)
+      ElMessage.success('新增用户成功')
     } catch (error) {
-      return ElMessage.error('表单校验失败')
+      const message = error?.response?.data?.message || '表单校验失败'
+      return ElMessage.error(message)
     } finally {
       saveTimer = null
     }

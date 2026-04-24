@@ -1,21 +1,29 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/userlist'
 import { storeToRefs } from 'pinia'
+import { updateUser } from '@/api/user'
 
 const userStore = useUserStore()
 const { loginUser, userlist } = storeToRefs(userStore)
+const { setLoginUser, syncUserInList } = userStore
+
+const createSettingsForm = () => ({
+  username: loginUser.value?.username ?? '',
+  email: loginUser.value?.email ?? '',
+  role: loginUser.value?.role ?? '',
+  profile: loginUser.value?.profile ?? '',
+  status: loginUser.value?.status ?? '',
+  id: loginUser.value?.id ?? null
+})
 
 // 根据当前登录的用户 绑定settings表单数据 回填信息
-let settingsForm = ref({
-  username: loginUser.value.username ?? '',
-  email: loginUser.value.email ?? '',
-  role: loginUser.value.role ?? '',
-  profile: loginUser.value.profile ?? '',
-  status: loginUser.value.status ?? '',
-  id: loginUser.value.id
-})
+let settingsForm = ref(createSettingsForm())
+
+watch(loginUser, () => {
+  Object.assign(settingsForm.value, createSettingsForm())
+}, { immediate: true })
 
 // 获取表单实例
 const formRef = ref(null)
@@ -38,25 +46,36 @@ const rules = {
 // cancel按钮事件
 const reset = () => {
   // 直接获取最近一次更新的loginuser的数据填充即可
-  Object.assign(settingsForm.value,loginUser.value)
+  Object.assign(settingsForm.value, createSettingsForm())
   ElMessage.success('表单重置成功')
 }
 
 // save changes按钮事件
 const saveChanges = async () => {
+  if (!loginUser.value?.id) {
+    return ElMessage.error('当前登录用户信息异常')
+  }
+
   try {
     // 先判断表单字段是否符合表单校验规则
     await formRef.value.validate()
-    // 先找到这个loginuser在数组的位置 再更新这个值到原来的位置 这样就完成了用户数组的更新
-    const index = userlist.value.findIndex(item => item.id === settingsForm.value.id)
-    Object.assign(userlist.value[index], settingsForm.value)
-    // 还需要更新loginuser的值 这是因为Home组件使用了loginuser的用户名 如果只更新了userlist 不更新loginuser 那么Home组件的欢迎标题不会改变的
-    // 这里用了浅拷贝 是因为 如果用 loginUser.value = settingsForm.value 相当于把地址给了loginUser.value loginUser是ref对象 这个值变了就会一起变
-    // 如果settingsForm.value 变了 就会导致loginUser也跟着同步变
-    Object.assign(loginUser.value,settingsForm.value)
+    const res = await updateUser(settingsForm.value.id, settingsForm.value)
+    const updatedUser = res.data.data
+
+    setLoginUser(updatedUser)
+    syncUserInList(updatedUser)
+
+    if (Array.isArray(userlist.value)) {
+      const index = userlist.value.findIndex(item => item.id === updatedUser.id)
+      if (index !== -1) {
+        Object.assign(settingsForm.value, userlist.value[index])
+      }
+    }
+
     ElMessage.success('更新个人资料成功')
   } catch (error) {
-    return ElMessage.error('表单校验失败')
+    const message = error?.response?.data?.message || '表单校验失败或保存失败'
+    return ElMessage.error(message)
   }
 }
 

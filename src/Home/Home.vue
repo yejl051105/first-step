@@ -1,39 +1,31 @@
-  <script setup>
-  import router from '@/router';
-  import { ElMessage } from 'element-plus';
-  import { computed, ref, watch, watchEffect } from 'vue';
-  import { useRoute } from 'vue-router';
-  import { useUserStore } from '@/stores/userlist';
-  import { storeToRefs } from 'pinia';
+<script setup>
+import router from '@/router';
+import { ElMessage } from 'element-plus';
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import { useUserStore } from '@/stores/userlist';
+import { storeToRefs } from 'pinia';
 
-  const userStore = useUserStore()
-  const { loginUser } = storeToRefs(userStore)
-  const { removeLoginUser, removeToken } = userStore
+const userStore = useUserStore()
+const { loginUser } = storeToRefs(userStore)
+const { clearAuth } = userStore
 
-  const route = useRoute()
-  const activeIndex = computed(() => route.path)
+const route = useRoute()
+const activeIndex = computed(() => route.path)
+const loginuser = computed(() => loginUser.value)
 
-  let loginuser = ref()
-
-  // 用监听器去监听登录用户的变化 从而去更新欢迎标题
-  watch(loginUser, () => {
-    loginuser.value = loginUser.value
-  }, { immediate: true })
-
-  // 处理退出登录事件
-  const handleConfirm = () => {
-    // 退出登录 清除登录凭证 Token 和 清除登录用户 loginUser
-    removeToken()
-    removeLoginUser()
-    ElMessage.warning('即将退出至登录页面')
-    setTimeout(() => {
-      router.push({ name: 'login' })
-    }, 1000);
-  }
+// 处理退出登录事件
+const handleConfirm = () => {
+  clearAuth()
+  ElMessage.warning('即将退出至登录页面')
+  setTimeout(() => {
+    router.push({ name: 'login' })
+  }, 1000);
+}
 </script>
 
   <template>
-    <div class="contaier">
+    <div class="container">
       <el-container class="body">
         <el-header class="header">
           <h2 class="left">Vue3 Admin System</h2>
