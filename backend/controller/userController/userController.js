@@ -19,6 +19,7 @@ const saveToLocal = (data) => {
 
 // --- 暴露出去是为了给loginContorller用的 ---
 exports.readUserList = readUserList;
+exports.saveToLocal = saveToLocal;
 
 // --- 获取所有用户 ---
 exports.getALlUser = (req, res) => {

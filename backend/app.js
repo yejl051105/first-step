@@ -11,13 +11,13 @@ app.use(express.json()); // 解析前端发来的 JSON
 const loginRoutes = require("./routes/loginRoutes")
 const userRoutes = require("./routes/userRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes")
-// const settingsRoutes = require("./routes/settingsRoutes")
+const settingsRoutes = require("./routes/settingsRoutes")
 
 // 挂载路由到（设置api统一前缀）
 app.use("/api/login", loginRoutes)
 app.use("/api/users", verifyToken, userRoutes)
 app.use("/api/dashboard", dashboardRoutes)
-// app.use("/api/settings", settingsRoutes)
+app.use("/api/settings", settingsRoutes)
 
 const PORT = 8080;
 app.listen(PORT, () => {

@@ -5,6 +5,7 @@ import "element-plus/es/components/message/style/css"
 import { ref, reactive } from "vue"
 import { useUserStore } from "@/stores/userlist"
 import { loginByPassword } from "@/api/auth"
+import { setNewSettings } from "../api/settings.js"
 
 const userStore = useUserStore()
 const { setLoginUser, setToken } = userStore
@@ -33,6 +34,7 @@ const login = async () => {
   try {
     loginLoading.value = true
 
+    console.log(FormData.value.username)
     const res = await loginByPassword({
       username: FormData.value.username,
       pwd: FormData.value.password
@@ -40,7 +42,13 @@ const login = async () => {
 
     const { token, userInfo } = res.data.data
 
+    // 记录登录用户到pinia中
     setLoginUser(userInfo)
+
+    // 记录新的个人资料信息到本地数据文件
+    setNewSettings(userInfo)
+
+    // 设置token
     setToken(token)
 
     FormData.value.username = ""

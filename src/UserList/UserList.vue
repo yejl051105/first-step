@@ -5,7 +5,7 @@ import isEqual from 'lodash/isEqual';
 import { useUserStore } from "@/stores/userlist";
 import { storeToRefs } from "pinia";
 import { addNewUser, deleteUser, updateUser } from "@/api/user";
-
+import { setNewSettings } from "../api/settings.js"
 const userStore = useUserStore()
 const { getUserList, setUserList, setLoginUser } = userStore
 const { loginUser, userlist } = storeToRefs(userStore)
@@ -228,9 +228,10 @@ const handleSaveOfEdit = () => {
       const res = await updateUser(editUserId.value, editUserMessage.value)
       const updatedUser = res.data.data
 
-      // 如果当前编辑的是当前登录用户，需要同步更新本地登录信息
+      // 如果当前编辑的是当前登录用户，需要同步更新本地登录信息和更新个人资料信息
       if (loginUser.value.id === editUserId.value) {
         setLoginUser(updatedUser)
+        await setNewSettings(updatedUser)
       }
 
       // 获取当前最新的用户数据
@@ -240,6 +241,7 @@ const handleSaveOfEdit = () => {
       }
       // 设置最新的用户数据
       setUserList(newUserListArray)
+
       // 完成编辑用户 关闭编辑弹窗
       editDialogVisible.value = false
       // 立刻执行一次搜索 能够马上看到新的用户数据

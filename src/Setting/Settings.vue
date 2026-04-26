@@ -1,12 +1,13 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/userlist'
 import { storeToRefs } from 'pinia'
 import { updateUser } from '@/api/user'
+import { getSettings, setNewSettings } from "../api/settings"
 
 const userStore = useUserStore()
-const { loginUser, userlist } = storeToRefs(userStore)
+const { loginUser } = storeToRefs(userStore)
 const { setLoginUser, syncUserInList } = userStore
 
 const createSettingsForm = () => ({
@@ -18,12 +19,26 @@ const createSettingsForm = () => ({
   id: loginUser.value?.id ?? null
 })
 
-// 根据当前登录的用户 绑定settings表单数据 回填信息
 let settingsForm = ref(createSettingsForm())
 
-watch(loginUser, () => {
-  Object.assign(settingsForm.value, createSettingsForm())
-}, { immediate: true })
+// 从后端获取个人资料信息
+const fetchSettings = async () => {
+  try {
+    const res = await getSettings()
+    const backendData = res.data?.data
+    if (backendData) {
+      settingsForm.value = { ...backendData }
+    } else {
+      settingsForm.value = createSettingsForm()
+    }
+  } catch {
+    settingsForm.value = createSettingsForm()
+  }
+}
+
+onMounted(() => {
+  fetchSettings()
+})
 
 // 获取表单实例
 const formRef = ref(null)
@@ -44,34 +59,33 @@ const rules = {
 }
 
 // cancel按钮事件
-const reset = () => {
-  // 直接获取最近一次更新的loginuser的数据填充即可
-  Object.assign(settingsForm.value, createSettingsForm())
+const reset = async () => {
+  await fetchSettings()
+  formRef.value?.clearValidate()
   ElMessage.success('表单重置成功')
 }
 
 // save changes按钮事件
 const saveChanges = async () => {
-  if (!loginUser.value?.id) {
+  if (!settingsForm.value?.id) {
     return ElMessage.error('当前登录用户信息异常')
   }
 
   try {
-    // 先判断表单字段是否符合表单校验规则
     await formRef.value.validate()
+
     const res = await updateUser(settingsForm.value.id, settingsForm.value)
+
+    // 获取修改完的新用户 用于更新个人资料和pinia存储当前登录的用户
     const updatedUser = res.data.data
 
-    setLoginUser(updatedUser)
+    // 同步到用户列表和登录用户状态
     syncUserInList(updatedUser)
+    setLoginUser(updatedUser)
 
-    if (Array.isArray(userlist.value)) {
-      const index = userlist.value.findIndex(item => item.id === updatedUser.id)
-      if (index !== -1) {
-        Object.assign(settingsForm.value, userlist.value[index])
-      }
-    }
-
+    // 同步到后端 settings 文件
+    await setNewSettings(updatedUser)
+    
     ElMessage.success('更新个人资料成功')
   } catch (error) {
     const message = error?.response?.data?.message || '表单校验失败或保存失败'
