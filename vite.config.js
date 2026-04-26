@@ -9,14 +9,7 @@ import IconsResolver from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
-export default defineConfig(({ mode }) => ({
-  define: {
-    __API_HOST__: JSON.stringify(
-      mode === 'production'
-        ? 'https://vue3-admin-system-api.onrender.com'
-        : 'http://localhost:8080'
-    )
-  },
+export default defineConfig({
   plugins: [
     vue(),
     vueDevTools(),
@@ -40,4 +33,4 @@ export default defineConfig(({ mode }) => ({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
-}))
+})
