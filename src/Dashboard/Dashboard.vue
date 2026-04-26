@@ -1,6 +1,6 @@
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { getEchart } from '@/api/getEchart';
+import { getEchart } from '@/utils/getEchart';
 import { useUserStore } from '@/stores/userlist';
 import { getDashboardData } from '@/api/dashboard';
 import { storeToRefs } from 'pinia';

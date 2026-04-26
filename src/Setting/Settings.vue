@@ -10,6 +10,8 @@ const userStore = useUserStore()
 const { loginUser } = storeToRefs(userStore)
 const { setLoginUser, syncUserInList } = userStore
 
+// 就算在onmounted中也不行 如果不按下面这样写的话 因为onmounted的时候会渲染template 然后表格绑定的数据没有就会报错 所以用这个??是最明智的选择
+// 能够确保数据为null的时候 也不会导致页面报错 显示空白页面
 const createSettingsForm = () => ({
   username: loginUser.value?.username ?? '',
   email: loginUser.value?.email ?? '',
@@ -27,7 +29,7 @@ const fetchSettings = async () => {
     const res = await getSettings()
     const backendData = res.data?.data
     if (backendData) {
-      settingsForm.value = { ...backendData }
+      settingsForm.value = backendData
     } else {
       settingsForm.value = createSettingsForm()
     }
@@ -85,7 +87,7 @@ const saveChanges = async () => {
 
     // 同步到后端 settings 文件
     await setNewSettings(updatedUser)
-    
+
     ElMessage.success('更新个人资料成功')
   } catch (error) {
     const message = error?.response?.data?.message || '表单校验失败或保存失败'

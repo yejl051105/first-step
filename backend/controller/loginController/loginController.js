@@ -42,7 +42,7 @@ exports.login = (req, res) => {
       { expiresIn: JWT_EXPIRES_IN }
     );
 
-    return res.json({
+    return res.status(200).json({
       code: 200,
       message: "登录成功",
       data: {

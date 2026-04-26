@@ -22,7 +22,7 @@ exports.getDashboardData = (req, res) => {
     // 统计非活跃用户数量
     let inactiveUsersCount = userLength - activeUsersCount
 
-    res.status(200).json({
+    return res.status(200).json({
       code: 200,
       message: "获取看板数据成功",
       data: {
@@ -37,7 +37,7 @@ exports.getDashboardData = (req, res) => {
 
   // 如果不是数组或者没有数据就返回服务器错误
   if (!userList || !Array.isArray(userList)) {
-    res.status(500).json({
+    return res.status(500).json({
       code: 500,
       message: "服务器错误，请稍后再试"
     })

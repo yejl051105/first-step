@@ -45,11 +45,11 @@ const login = async () => {
     // 记录登录用户到pinia中
     setLoginUser(userInfo)
 
+    // 设置token（必须在调 settings API 之前，因为 settings 路由已加 JWT 保护）
+    setToken(token)
+
     // 记录新的个人资料信息到本地数据文件
     setNewSettings(userInfo)
-
-    // 设置token
-    setToken(token)
 
     FormData.value.username = ""
     FormData.value.password = ""

@@ -16,8 +16,8 @@ const settingsRoutes = require("./routes/settingsRoutes")
 // 挂载路由到（设置api统一前缀）
 app.use("/api/login", loginRoutes)
 app.use("/api/users", verifyToken, userRoutes)
-app.use("/api/dashboard", dashboardRoutes)
-app.use("/api/settings", settingsRoutes)
+app.use("/api/dashboard", verifyToken, dashboardRoutes)
+app.use("/api/settings", verifyToken, settingsRoutes)
 
 const PORT = 8080;
 app.listen(PORT, () => {
