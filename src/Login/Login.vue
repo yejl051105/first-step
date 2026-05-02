@@ -87,7 +87,7 @@ const rules = reactive({
       <!-- 登录盒子上半表单部分 -->
       <div class="container-top">
         <!-- 表单标题 -->
-        <h2 class="title">Vue3 Demo Admin</h2>
+        <h2 class="title">Vue3 Admin System</h2>
         <!-- 表单部分 -->
         <el-form class="container-form" :model="FormData" :rules="rules" ref="FormRef">
           <el-form-item class="el-form-item" prop="username">
