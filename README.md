@@ -32,7 +32,7 @@
 ## 项目结构
 
 ```
-first-step/
+vue3 admin system/
 ├── src/
 │   ├── Login/                # 登录页
 │   ├── Home/                 # 后台布局页（Header + 侧边栏 + RouterView）
@@ -51,7 +51,16 @@ first-step/
 │   ├── middleware/           # JWT 验证中间件
 │   └── config/               # JWT 密钥与过期时间配置
 └── README.md
+
 ```
+
+## 在线演示
+
+- 访问地址：[Vue3 Admin System](https://vue3-admin-system.vercel.app/login)
+- Admin 账号：`ethan.clark` / `123123`
+- User 账号：`emma.scott` / `123123`
+
+Admin 账号可体验完整权限（增删改所有用户），User 账号仅可编辑自身且无法删除用户。
 
 ## 本地运行
 
@@ -85,15 +94,6 @@ npm run dev
 ```
 
 前端运行在 `http://localhost:5173`
-
-## 演示账号
-
-| 用户名 | 密码 | 角色 |
-|--------|------|------|
-| `ethan.clark` | `123123` | Admin |
-| `emma.scott` | `123123` | User |
-
-Admin 账号可体验完整权限（增删改所有用户），User 账号仅可编辑自身且无法删除用户。
 
 ## 接口清单
 
@@ -145,18 +145,26 @@ Admin 账号可体验完整权限（增删改所有用户），User 账号仅可
 
 ## 页面展示
 
-```
-![登录页面](../vue3%20admin%20system/docs/01_登录页面.png)
+### 登录页面
 
-![数据看板](../vue3%20admin%20system/docs/02_数据看板.png)
+![登录页面](./docs/01_登录页面.png)
 
-![用户列表](../vue3%20admin%20system/docs/03_用户列表.png)
+### 数据看板
 
-![设置资料](../vue3%20admin%20system/docs/04_设置资料.png)
+![数据看板](./docs/02_数据看板.png)
 
-![权限管理1](../vue3%20admin%20system/docs/05_权限管理1.png)
+### 用户列表
 
-![权限管理2](../vue3%20admin%20system/docs/05_权限管理2.png)
+![用户列表](./docs/03_用户列表.png)
 
-![权限管理3](../vue3%20admin%20system/docs/05_权限管理3.png)
-```
+### 设置资料
+
+![设置资料](./docs/04_设置资料.png)
+
+### 权限管理
+
+![权限管理1](./docs/05_权限管理1.png)
+
+![权限管理2](./docs/05_权限管理2.png)
+
+![权限管理3](./docs/05_权限管理3.png)
