@@ -143,3 +143,20 @@ Admin 账号可体验完整权限（增删改所有用户），User 账号仅可
 路由守卫 `beforeEach` 作为前端兜底：无 Token 时直接拦截页面访问，不发起请求。
 
 
+## 页面展示
+
+```
+![登录页面](../vue3%20admin%20system/docs/01_登录页面.png)
+
+![数据看板](../vue3%20admin%20system/docs/02_数据看板.png)
+
+![用户列表](../vue3%20admin%20system/docs/03_用户列表.png)
+
+![设置资料](../vue3%20admin%20system/docs/04_设置资料.png)
+
+![权限管理1](../vue3%20admin%20system/docs/05_权限管理1.png)
+
+![权限管理2](../vue3%20admin%20system/docs/05_权限管理2.png)
+
+![权限管理3](../vue3%20admin%20system/docs/05_权限管理3.png)
+```
