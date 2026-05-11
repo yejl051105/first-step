@@ -1,14 +1,12 @@
-import Login from '@/Login/Login.vue'
-import Home from '@/Home/Home.vue'
+import Login from '@/views/Login/Login.vue'
+import Home from '@/views/Home/Home.vue'
 import { createRouter, createWebHistory } from 'vue-router'
-import UserList from '@/UserList/UserList.vue'
-import Dashboard from '@/Dashboard/Dashboard.vue'
-import Setting from '@/Setting/Settings.vue'
+import UserList from '@/views/UserList/UserList.vue'
+import Dashboard from '@/views/Dashboard/Dashboard.vue'
+import Setting from '@/views/Setting/Settings.vue'
 import { ElMessage } from 'element-plus'
-import { useUserStore } from '@/stores/userlist'
+import { useUserStore } from '@/stores/user.store'
 import { storeToRefs } from 'pinia'
-
-
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,17 +26,17 @@ const router = createRouter({
 router.beforeEach(async (to, from) => {
   const userStore = useUserStore()
   const { token, userlist } = storeToRefs(userStore)
-  const isPermision = token.value
 
-  if (to.name === 'login' && isPermision) {
+  if (to.name === 'login' && token.value) {
     return { path: '/home' }
   }
 
-  if (to.name !== 'login' && !isPermision) {
+  if (to.name !== 'login' && !token.value) {
     ElMessage.error("没有登录权限")
     return { name: 'login' }
   }
 
+  // 兜底：如果 userlist 为空（例如登录后跳转时 store 还未就绪），补拉一次
   if (to.name !== 'login' && !Array.isArray(userlist.value)) {
     const latestUserList = await userStore.getUserList()
 

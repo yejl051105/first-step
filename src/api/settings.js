@@ -1,10 +1,9 @@
-import userInstance from "@/api/request";
-import { settingsBaseURL } from "@/config/axios-baseURL";
+import userInstance, { apiConfig } from "@/api/request";
 
 export const getSettings = () => {
-  return userInstance.get(settingsBaseURL)
+  return userInstance.get(apiConfig.settingsBaseURL)
 }
 
 export const setNewSettings = (loginForm) => {
-  return userInstance.post(settingsBaseURL, loginForm)
+  return userInstance.post(apiConfig.settingsBaseURL, loginForm)
 }

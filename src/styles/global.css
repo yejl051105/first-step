@@ -1,0 +1,9 @@
+body {
+  background-color: var(--app-bg);
+  color: var(--app-text);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}

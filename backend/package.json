@@ -2,11 +2,11 @@
   "name": "first-step",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "start": "node --env-file=.env src/server.js",
+    "dev": "nodemon --exec \"node --env-file=.env\" src/server.js"
   },
   "author": "",
   "license": "ISC",

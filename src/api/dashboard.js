@@ -1,6 +1,5 @@
-import userInstance from "@/api/request";
-import { dashboardBaseURL } from "@/config/axios-baseURL";
+import userInstance, { apiConfig } from "@/api/request";
 
 export function getDashboardData() {
-  return userInstance.get(dashboardBaseURL)
+  return userInstance.get(apiConfig.dashboardBaseURL)
 }
