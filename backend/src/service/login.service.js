@@ -1,12 +1,12 @@
-const bcrypt = require('bcryptjs')
-const userService = require('./user.service')
-const jwt = require('jsonwebtoken')
-const { JWT_SECRET, JWT_EXPIRES_IN } = require('../utils/jwt')
+import bcrypt from 'bcryptjs'
+import { getByUsername } from './user.service.js'
+import jwt from 'jsonwebtoken'
+import { JWT_SECRET, JWT_EXPIRES_IN } from '../utils/jwt.js'
 
-const login = async (username, pwd) => {
+export const login = async (username, pwd) => {
   if (!username || !pwd) return { error: '用户名和密码不能为空' }
 
-  const user = userService.getByUsername(username)
+  const user = getByUsername(username)
   if (!user) return { error: '用户名不存在' }
 
   const isMatch = await bcrypt.compare(pwd, user.pwd)
@@ -21,5 +21,3 @@ const login = async (username, pwd) => {
 
   return { token, userInfo: safeUser }
 }
-
-module.exports = { login }

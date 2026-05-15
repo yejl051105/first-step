@@ -11,6 +11,7 @@ const emit = defineEmits(['update:visible', 'save', 'cancel'])
 
 const formRef = ref(null)
 
+// 工厂函数
 const defaultForm = () => ({
   username: '',
   email: '',
@@ -68,8 +69,8 @@ const handleSave = async () => {
 </script>
 
 <template>
-  <el-dialog :model-value="visible" @update:model-value="(val) => emit('update:visible', val)"
-    :title="title" width="500" align-center :show-close="false">
+  <el-dialog :model-value="visible" @update:model-value="(val) => emit('update:visible', val)" :title="title"
+    width="500" align-center :show-close="false">
     <el-form class="form-container" ref="formRef" :rules="rules" label-position="top" :model="formData">
       <el-form-item label="Username" prop="username">
         <el-input v-model="formData.username" maxlength="15"></el-input>

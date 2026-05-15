@@ -1,8 +1,9 @@
-const express = require('express')
-const router = express.Router()
-const { getSettings, setNewSettings } = require('../controller/settings.controller')
+import { Router } from 'express'
+import { getSettings, setNewSettings } from '../controller/settings.controller.js'
+
+const router = Router()
 
 router.get('/', getSettings)
 router.post('/', setNewSettings)
 
-module.exports = router
+export default router

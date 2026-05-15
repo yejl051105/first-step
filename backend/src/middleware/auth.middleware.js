@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken')
-const { JWT_SECRET } = require('../utils/jwt')
+import jwt from 'jsonwebtoken'
+import { JWT_SECRET } from '../utils/jwt.js'
 
-exports.verifyToken = (req, res, next) => {
+export const verifyToken = (req, res, next) => {
   try {
     const authorization = req.headers.authorization
 

@@ -48,7 +48,7 @@ const login = async () => {
     setToken(token)
 
     // 记录新的个人资料信息到后端 settings 文件
-    setNewSettings(userInfo)
+    setNewSettings(userInfo).catch(() => {})
 
     // 登录成功后拉取全量用户数据，存入 store，后续页面直接用
     await getUserList()
@@ -64,6 +64,7 @@ const login = async () => {
     const message = error?.response?.data?.message || "登录失败，请稍后重试"
     return ElMessage.error(message)
   } finally {
+    // 不管返回的结果如何 loading状态都会在最后结束
     loginLoading.value = false
   }
 }

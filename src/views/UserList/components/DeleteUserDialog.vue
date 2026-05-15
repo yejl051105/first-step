@@ -12,8 +12,8 @@ const emit = defineEmits(['update:visible', 'confirm', 'cancel'])
     <span>Are you sure to delete this user?</span>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="emit('cancel')">No</el-button>
-        <el-button type="primary" @click="emit('confirm')">Yes</el-button>
+        <el-button @click="$emit('cancel')">No</el-button>
+        <el-button type="primary" @click="$emit('confirm')">Yes</el-button>
       </div>
     </template>
   </el-dialog>

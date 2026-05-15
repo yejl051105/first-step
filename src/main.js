@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import App from './App.vue'
 import router from './router'
+import 'element-plus/theme-chalk/el-message.css'
 import './styles/variables.css'
 import './styles/global.css'
 

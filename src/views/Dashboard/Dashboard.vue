@@ -20,11 +20,18 @@ let chartInstance = null
 
 // 从接口获取的数据 赋值到当前页面的变量上
 const getData = async () => {
-  const res = await getDashboardData()
-  activeUsersCount.value = res.data.data.activeUsersCount
-  inactiveUsersCount.value = res.data.data.inactiveUsersCount
-  adminUsersCount.value = res.data.data.adminUsersCount
-  userLength.value = res.data.data.userLength
+  try {
+    const res = await getDashboardData()
+    activeUsersCount.value = res.data.data.activeUsersCount
+    inactiveUsersCount.value = res.data.data.inactiveUsersCount
+    adminUsersCount.value = res.data.data.adminUsersCount
+    userLength.value = res.data.data.userLength
+  } catch {
+    activeUsersCount.value = 0
+    inactiveUsersCount.value = 0
+    adminUsersCount.value = 0
+    userLength.value = 0
+  }
 }
 
 // 进来就先调用接口获取数据 然后渲染到图表上

@@ -3,6 +3,7 @@ import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user.store'
 import { storeToRefs } from 'pinia'
 
+// 路由懒加载
 const Login = () => import('@/views/Login/Login.vue')
 const Home = () => import('@/views/Home/Home.vue')
 const UserList = () => import('@/views/UserList/UserList.vue')
@@ -15,7 +16,7 @@ const router = createRouter({
     { path: '/', redirect: '/login' },
     { path: '/login', name: 'login', component: Login },
     {
-      path: '/home', component: Home, redirect: '/home/userlist', children: [
+      path: '/home', name: 'home', component: Home, redirect: '/home/userlist', children: [
         { path: 'userlist', name: 'userlist', component: UserList },
         { path: 'settings', name: 'settings', component: Setting },
       ]
@@ -23,10 +24,14 @@ const router = createRouter({
   ],
 })
 
+
+// 检查当前路由是否注册
 const isDashboardRegistered = () => {
   return router.getRoutes().some(r => r.name === 'dashboard')
 }
 
+
+// 动态路由添加
 const addDashboardRoute = () => {
   if (!isDashboardRegistered()) {
     router.addRoute('home', {
@@ -37,6 +42,7 @@ const addDashboardRoute = () => {
   }
 }
 
+// 删除某个路由
 const removeDashboardRoute = () => {
   if (isDashboardRegistered()) {
     router.removeRoute('dashboard')

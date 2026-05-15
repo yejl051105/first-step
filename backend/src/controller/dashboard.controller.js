@@ -1,7 +1,7 @@
-const dashboardService = require('../service/dashboard.service')
-const { success, error } = require('../utils/response')
+import * as dashboardService from '../service/dashboard.service.js'
+import { success, error } from '../utils/response.js'
 
-exports.getDashboardData = (req, res) => {
+export const getDashboardData = (req, res) => {
   try {
     const data = dashboardService.getDashboardData()
     if (data.error) return error(res, data.error)

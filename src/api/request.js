@@ -1,5 +1,4 @@
 import axios from "axios";
-import { clearAuthStorage, getAccessToken } from "@/utils/storage";
 
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:8080'
 const apiBaseURL = `${API_HOST}/api`
@@ -11,13 +10,25 @@ export const apiConfig = {
   dashboardBaseURL: `${apiBaseURL}/dashboard`,
 }
 
+const STORE_KEY = 'user'
+
+function getToken() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY)
+    if (!raw) return null
+    return JSON.parse(raw).token || null
+  } catch {
+    return null
+  }
+}
+
 const userInstance = axios.create({
   baseURL: apiConfig.userBaseURL,
   timeout: 10000
 });
 
 userInstance.interceptors.request.use(function (config) {
-  const token = getAccessToken()
+  const token = getToken()
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -28,13 +39,10 @@ userInstance.interceptors.request.use(function (config) {
 
 userInstance.interceptors.response.use(function (response) {
   return response;
-  // 如果网络响应的状态码不是2开头的 就会进入失败的回调
 }, function (error) {
-  // 401是没有权限
   if (error.response?.status === 401) {
-    clearAuthStorage()
+    localStorage.removeItem(STORE_KEY)
 
-    // 如果不是在登录页面就返回到登录页面
     if (window.location.pathname !== "/login") {
       window.location.href = "/login"
     }

@@ -1,7 +1,7 @@
-const userService = require('../service/user.service')
-const { success, error } = require('../utils/response')
+import * as userService from '../service/user.service.js'
+import { success, error } from '../utils/response.js'
 
-exports.getAllUser = (req, res) => {
+export const getAllUser = (req, res) => {
   try {
     const users = userService.getAll()
     success(res, users, '获取用户数据成功')
@@ -10,7 +10,7 @@ exports.getAllUser = (req, res) => {
   }
 }
 
-exports.deleteUser = (req, res) => {
+export const deleteUser = (req, res) => {
   try {
     const deleted = userService.deleteById(req.params.id)
     if (!deleted) return error(res, '用户不存在', 404)
@@ -20,7 +20,7 @@ exports.deleteUser = (req, res) => {
   }
 }
 
-exports.addUser = async (req, res) => {
+export const addUser = async (req, res) => {
   try {
     const result = await userService.create(req.body)
     if (result.error) return error(res, result.error, 400)
@@ -30,7 +30,7 @@ exports.addUser = async (req, res) => {
   }
 }
 
-exports.updateUser = async (req, res) => {
+export const updateUser = async (req, res) => {
   try {
     const updated = await userService.update(req.params.id, req.body)
     if (!updated) return error(res, '用户不存在', 404)
@@ -40,7 +40,7 @@ exports.updateUser = async (req, res) => {
   }
 }
 
-exports.setNewUserList = (req, res) => {
+export const setNewUserList = (req, res) => {
   try {
     const result = userService.replaceAll(req.body)
     if (result.error) return error(res, result.error, 400)

@@ -1,8 +1,8 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user.store'
-import { storeToRefs } from 'pinia'
 import { updateUser } from '@/api/user'
 import { getSettings, setNewSettings } from "@/api/settings"
 
@@ -10,42 +10,47 @@ const userStore = useUserStore()
 const { loginUser } = storeToRefs(userStore)
 const { setLoginUser, syncUserInList } = userStore
 
-// 就算在onmounted中也不行 如果不按下面这样写的话 因为onmounted的时候 已经渲染完了template 如果表格绑定的数据没有就会报错 所以用这个??是最明智的选择
-// 能够确保数据为null或undefined的时候显示空字符串 也不会导致页面报错 显示空白页面
-const createSettingsForm = () => ({
-  username: loginUser.value?.username ?? '',
-  email: loginUser.value?.email ?? '',
-  role: loginUser.value?.role ?? '',
-  profile: loginUser.value?.profile ?? '',
-  status: loginUser.value?.status ?? '',
-  id: loginUser.value?.id ?? null
+const settingsForm = ref({
+  username: '',
+  email: '',
+  role: '',
+  profile: '',
+  status: '',
+  id: null
 })
 
-let settingsForm = ref(createSettingsForm())
-
-// 从后端获取个人资料信息
 const fetchSettings = async () => {
   try {
     const res = await getSettings()
     const backendData = res.data?.data
     if (backendData) {
       settingsForm.value = backendData
-    } else {
-      settingsForm.value = createSettingsForm()
     }
   } catch {
-    settingsForm.value = createSettingsForm()
+    // 请求失败保持当前表单，不覆盖
   }
 }
+
+// 其他页面可能修改了登录用户信息，回来时要自动同步
+watch(loginUser, (newVal) => {
+  if (newVal) {
+    settingsForm.value = {
+      username: newVal.username ?? '',
+      email: newVal.email ?? '',
+      role: newVal.role ?? '',
+      profile: newVal.profile ?? '',
+      status: newVal.status ?? '',
+      id: newVal.id ?? null
+    }
+  }
+})
 
 onMounted(() => {
   fetchSettings()
 })
 
-// 获取表单实例
 const formRef = ref(null)
 
-// 表单校验规则
 const rules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -60,14 +65,12 @@ const rules = {
   ]
 }
 
-// cancel按钮事件
 const reset = async () => {
   await fetchSettings()
   formRef.value?.clearValidate()
   ElMessage.success('表单重置成功')
 }
 
-// save changes按钮事件
 const saveChanges = async () => {
   if (!settingsForm.value?.id) {
     return ElMessage.error('当前登录用户信息异常')
@@ -78,14 +81,11 @@ const saveChanges = async () => {
 
     const res = await updateUser(settingsForm.value.id, settingsForm.value)
 
-    // 获取修改完的新用户 用于更新个人资料和pinia存储当前登录的用户
     const updatedUser = res.data.data
 
-    // 同步到用户列表和登录用户状态
     syncUserInList(updatedUser)
     setLoginUser(updatedUser)
 
-    // 同步到后端 settings 文件
     await setNewSettings(updatedUser)
 
     ElMessage.success('更新个人资料成功')
@@ -96,14 +96,8 @@ const saveChanges = async () => {
 }
 
 const options = [
-  {
-    value: 'Admin',
-    label: 'Admin',
-  },
-  {
-    value: 'User',
-    label: 'User',
-  }
+  { value: 'Admin', label: 'Admin' },
+  { value: 'User', label: 'User' }
 ]
 </script>
 
@@ -135,7 +129,6 @@ const options = [
       </div>
     </div>
   </div>
-
 </template>
 
 <style scoped>

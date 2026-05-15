@@ -23,7 +23,7 @@ const emit = defineEmits(['edit', 'delete', 'page-change'])
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="Oporate">
+      <el-table-column label="Operate">
         <template #default="scope">
           <el-button size="small" @click="$emit('delete', scope.$index, scope.row)">Delete</el-button>
         </template>

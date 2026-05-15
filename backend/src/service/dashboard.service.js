@@ -1,7 +1,7 @@
-const userService = require('./user.service')
+import { getAll } from './user.service.js'
 
-const getDashboardData = () => {
-  const users = userService.getAll()
+export const getDashboardData = () => {
+  const users = getAll()
 
   if (!Array.isArray(users)) return { error: '服务器错误，请稍后再试' }
 
@@ -21,5 +21,3 @@ const getDashboardData = () => {
     inactiveUsersCount: userLength - activeUsersCount,
   }
 }
-
-module.exports = { getDashboardData }

@@ -1,7 +1,7 @@
-const loginService = require('../service/login.service')
-const { success, error } = require('../utils/response')
+import * as loginService from '../service/login.service.js'
+import { success, error } from '../utils/response.js'
 
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
   try {
     const { username, pwd } = req.body || {}
     const result = await loginService.login(username, pwd)

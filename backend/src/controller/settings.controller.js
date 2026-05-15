@@ -1,7 +1,7 @@
-const settingsService = require('../service/settings.service')
-const { success, error } = require('../utils/response')
+import * as settingsService from '../service/settings.service.js'
+import { success, error } from '../utils/response.js'
 
-exports.getSettings = (req, res) => {
+export const getSettings = (req, res) => {
   try {
     const data = settingsService.getSettings()
     if (!data) return error(res, '获取个人资料信息失败', 500)
@@ -11,7 +11,7 @@ exports.getSettings = (req, res) => {
   }
 }
 
-exports.setNewSettings = (req, res) => {
+export const setNewSettings = (req, res) => {
   try {
     const data = settingsService.setSettings(req.body)
     success(res, data, '设置个人资料信息成功')

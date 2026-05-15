@@ -1,21 +1,21 @@
-const bcrypt = require('bcryptjs')
-const userModel = require('../model/user.model')
+import bcrypt from 'bcryptjs'
+import * as userModel from '../model/user.model.js'
 
 const SALT_ROUNDS = 10
 
-const getAll = () => {
+export const getAll = () => {
   return userModel.readAll()
 }
 
-const getById = (id) => {
+export const getById = (id) => {
   return userModel.findById(id)
 }
 
-const getByUsername = (username) => {
+export const getByUsername = (username) => {
   return userModel.findByUsername(username)
 }
 
-const deleteById = (id) => {
+export const deleteById = (id) => {
   const users = userModel.readAll()
   const index = users.findIndex(item => item.id === Number(id))
 
@@ -26,7 +26,7 @@ const deleteById = (id) => {
   return deleted[0]
 }
 
-const create = async (userData) => {
+export const create = async (userData) => {
   const users = userModel.readAll()
 
   // 如果重名则拒绝
@@ -46,7 +46,7 @@ const create = async (userData) => {
   return userData
 }
 
-const update = async (id, userData) => {
+export const update = async (id, userData) => {
   const users = userModel.readAll()
   const index = users.findIndex(item => item.id === Number(id))
 
@@ -66,11 +66,9 @@ const update = async (id, userData) => {
   return users[index]
 }
 
-const replaceAll = (newUserList) => {
+export const replaceAll = (newUserList) => {
   if (!Array.isArray(newUserList)) return { error: '请求数据格式不正确' }
 
   userModel.writeAll(newUserList)
   return newUserList
 }
-
-module.exports = { getAll, getById, getByUsername, deleteById, create, update, replaceAll }

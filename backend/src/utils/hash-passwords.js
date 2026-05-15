@@ -1,8 +1,12 @@
-const bcrypt = require('bcryptjs')
-const path = require('path')
-const fs = require('fs')
+import bcrypt from 'bcryptjs'
+import path from 'path'
+import fs from 'fs'
+import { fileURLToPath } from 'url'
 
-const dataPath = path.join(__dirname, '..', 'data', 'userData.json')
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const dataPath = path.resolve(__dirname, '../../data/userData.json')
 const users = JSON.parse(fs.readFileSync(dataPath, 'utf-8'))
 
 const SALT_ROUNDS = 10
