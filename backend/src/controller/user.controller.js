@@ -20,9 +20,9 @@ exports.deleteUser = (req, res) => {
   }
 }
 
-exports.addUser = (req, res) => {
+exports.addUser = async (req, res) => {
   try {
-    const result = userService.create(req.body)
+    const result = await userService.create(req.body)
     if (result.error) return error(res, result.error, 400)
     success(res, result, '新增用户成功', 201)
   } catch (err) {
@@ -30,9 +30,9 @@ exports.addUser = (req, res) => {
   }
 }
 
-exports.updateUser = (req, res) => {
+exports.updateUser = async (req, res) => {
   try {
-    const updated = userService.update(req.params.id, req.body)
+    const updated = await userService.update(req.params.id, req.body)
     if (!updated) return error(res, '用户不存在', 404)
     success(res, updated, '更新用户成功')
   } catch (err) {

@@ -43,8 +43,13 @@ const handleConfirm = () => {
         <el-container class="footer">
           <el-aside class="aside">
             <el-menu class="menu" :default-active="activeIndex" router>
-              <el-menu-item index="/home/dashboard"><el-icon><i-ep-Odometer /></el-icon>
-                Dashboard</el-menu-item>
+              <el-menu-item
+                v-if="loginuser?.role === 'Admin'"
+                index="/home/dashboard"
+              >
+                <el-icon><i-ep-Odometer /></el-icon>
+                Dashboard
+              </el-menu-item>
               <el-menu-item index="/home/userlist"><el-icon><i-ep-UserFilled /></el-icon>
                 User
                 Management</el-menu-item>

@@ -1,4 +1,7 @@
+const bcrypt = require('bcryptjs')
 const userModel = require('../model/user.model')
+
+const SALT_ROUNDS = 10
 
 const getAll = () => {
   return userModel.readAll()
@@ -23,7 +26,7 @@ const deleteById = (id) => {
   return deleted[0]
 }
 
-const create = (userData) => {
+const create = async (userData) => {
   const users = userModel.readAll()
 
   // 如果重名则拒绝
@@ -34,16 +37,24 @@ const create = (userData) => {
     userData.id = Date.now()
   }
 
+  if (userData.pwd) {
+    userData.pwd = await bcrypt.hash(userData.pwd, SALT_ROUNDS)
+  }
+
   users.push(userData)
   userModel.writeAll(users)
   return userData
 }
 
-const update = (id, userData) => {
+const update = async (id, userData) => {
   const users = userModel.readAll()
   const index = users.findIndex(item => item.id === Number(id))
 
   if (index === -1) return null
+
+  if (userData.pwd) {
+    userData.pwd = await bcrypt.hash(userData.pwd, SALT_ROUNDS)
+  }
 
   users[index] = {
     ...users[index],

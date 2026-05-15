@@ -5,7 +5,7 @@
     "email": "ethan.clark@example.com",
     "role": "Admin",
     "status": "Active",
-    "pwd": "123123",
+    "pwd": "$2b$10$yx4.cIngf7nmIpQ9YbVPLO9iijCv3AL0q1/WSbDhttUYjFbKtygVq",
     "profile": "暂无"
   },
   {
@@ -14,7 +14,7 @@
     "email": "emma.scott@example.com",
     "role": "User",
     "status": "Active",
-    "pwd": "123123",
+    "pwd": "$2b$10$BblF96nyE3QmSDAX2a4fIOpS0Z8XrgblujqSrPLJb00WWSSO2P.Ke",
     "profile": "暂无"
   },
   {
@@ -23,7 +23,7 @@
     "email": "ava.turner@example.com",
     "role": "Admin",
     "status": "Active",
-    "pwd": "123123",
+    "pwd": "$2b$10$gbebPyMW3LHZOcDAuri.PeKtx6hSs/fnSYFjHbYdAiVXrSAxxclu2",
     "profile": "暂无"
   },
   {
@@ -32,7 +32,7 @@
     "email": "benjamin.young@example.com",
     "role": "User",
     "status": "Active",
-    "pwd": "123123",
+    "pwd": "$2b$10$bTS1/WUgwM/UTBYL8SZEY.4ko4Go3Qw2BRiSa0f/hPkd.VrsDMY/.",
     "profile": "暂无"
   },
   {
@@ -41,7 +41,7 @@
     "email": "mia.adams@example.com",
     "role": "User",
     "status": "Inactive",
-    "pwd": "123123",
+    "pwd": "$2b$10$Ch7pJ0.dyc7n7pBQdscFUuAARJsFNlZ3ul9Lay84i7taVBkMRl82S",
     "profile": "暂无"
   },
   {
@@ -50,7 +50,7 @@
     "email": "julianlooong@gmail.com",
     "role": "User",
     "status": "Active",
-    "pwd": "123123",
+    "pwd": "$2b$10$3W.UhOdA2bKZh23xj/cz3OqZ0C2yCOBvtzg7Z.SMxF1PbGDoUJX5.",
     "profile": "暂无"
   }
 ]

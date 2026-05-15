@@ -1,14 +1,14 @@
 const loginService = require('../service/login.service')
 const { success, error } = require('../utils/response')
 
-exports.login = (req, res) => {
+exports.login = async (req, res) => {
   try {
     const { username, pwd } = req.body || {}
-    const result = loginService.login(username, pwd)
+    const result = await loginService.login(username, pwd)
 
     if (result.error) {
       const statusCode = result.error === '用户名不存在' ? 404 :
-                          result.error === '密码错误' ? 401 : 400
+        result.error === '密码错误' ? 401 : 400
       return error(res, result.error, statusCode)
     }
 
